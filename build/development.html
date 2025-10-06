@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tinqer - Type-safe LINQ-to-SQL query builder for TypeScript">
+  <title>Development - Tinqer Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <a href="index.html" class="mobile-logo">
+      <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+      <span>Tinqer</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="overlay"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+        <span>Tinqer</span>
+      </a>
+      <p class="tagline">Type-safe LINQ-to-SQL for TypeScript</p>
+    </div>
+    <ul class="nav-list">
+  <li><a href="index.html">Getting Started</a></li>
+  <li><a href="guide.html">Guide</a></li>
+  <li><a href="api-reference.html">API Reference</a></li>
+  <li><a href="adapters.html">Adapters</a></li>
+  <li class="active"><a href="development.html">Development</a></li>
+  <li><a href="architecture.html">Architecture</a></li>
+</ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <span>Development</span></div>
+
+    <div class="content-wrapper">
+      <article class="markdown-body">
+        <p><a href="../README.md">← Back to README</a></p>
+<h1 id="development-guide" tabindex="-1"><a class="anchor" href="#development-guide" aria-hidden="true">#</a> Development Guide</h1>
+<p>Guide for contributing to Tinqer, running tests, and troubleshooting.</p>
+<h2 id="table-of-contents" tabindex="-1"><a class="anchor" href="#table-of-contents" aria-hidden="true">#</a> Table of Contents</h2>
+<ul>
+<li><a href="#1-getting-started">1. Getting Started</a>
+<ul>
+<li><a href="#11-prerequisites">1.1 Prerequisites</a></li>
+<li><a href="#12-installation">1.2 Installation</a></li>
+<li><a href="#13-project-structure">1.3 Project Structure</a></li>
+</ul>
+</li>
+<li><a href="#2-building">2. Building</a>
+<ul>
+<li><a href="#21-build-commands">2.1 Build Commands</a></li>
+<li><a href="#22-clean-build">2.2 Clean Build</a></li>
+</ul>
+</li>
+<li><a href="#3-testing">3. Testing</a>
+<ul>
+<li><a href="#31-running-tests">3.1 Running Tests</a></li>
+<li><a href="#32-test-organization">3.2 Test Organization</a></li>
+<li><a href="#33-writing-tests">3.3 Writing Tests</a></li>
+</ul>
+</li>
+<li><a href="#4-code-quality">4. Code Quality</a>
+<ul>
+<li><a href="#41-linting">4.1 Linting</a></li>
+<li><a href="#42-formatting">4.2 Formatting</a></li>
+</ul>
+</li>
+<li><a href="#5-contributing">5. Contributing</a>
+<ul>
+<li><a href="#51-coding-standards">5.1 Coding Standards</a></li>
+<li><a href="#52-commit-guidelines">5.2 Commit Guidelines</a></li>
+<li><a href="#53-pull-requests">5.3 Pull Requests</a></li>
+</ul>
+</li>
+<li><a href="#6-troubleshooting">6. Troubleshooting</a>
+<ul>
+<li><a href="#61-common-issues">6.1 Common Issues</a></li>
+<li><a href="#62-parser-errors">6.2 Parser Errors</a></li>
+<li><a href="#63-type-errors">6.3 Type Errors</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="1-getting-started" tabindex="-1"><a class="anchor" href="#1-getting-started" aria-hidden="true">#</a> 1. Getting Started</h2>
+<h3 id="11-prerequisites" tabindex="-1"><a class="anchor" href="#11-prerequisites" aria-hidden="true">#</a> 1.1 Prerequisites</h3>
+<ul>
+<li>Node.js 18+ (for ESM support)</li>
+<li>npm 8+</li>
+<li>TypeScript 5.3+</li>
+<li>PostgreSQL 12+ (for PostgreSQL adapter development)</li>
+<li>SQLite 3.35+ (for SQLite adapter development)</li>
+</ul>
+<h3 id="12-installation" tabindex="-1"><a class="anchor" href="#12-installation" aria-hidden="true">#</a> 1.2 Installation</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Clone the repository</span>
+git <span class="hljs-built_in">clone</span> https://github.com/webpods-org/tinqer.git
+<span class="hljs-built_in">cd</span> tinqer
+
+<span class="hljs-comment"># Install dependencies</span>
+npm install
+
+<span class="hljs-comment"># Build all packages</span>
+./scripts/build.sh
+</code></pre>
+<h3 id="13-project-structure" tabindex="-1"><a class="anchor" href="#13-project-structure" aria-hidden="true">#</a> 1.3 Project Structure</h3>
+<pre class="hljs"><code>tinqer/
+├── packages/
+│   ├── tinqer/                          # Core library
+│   │   ├── src/
+│   │   │   ├── parser/                  # Lambda expression parser (OXC)
+│   │   │   ├── converter/               # AST to expression tree converter
+│   │   │   ├── queryable/               # Queryable API
+│   │   │   ├── visitors/                # SQL generation visitors
+│   │   │   └── types/                   # TypeScript type definitions
+│   │   └── tests/                       # Core library tests
+│   │
+│   ├── tinqer-sql-pg-promise/           # PostgreSQL adapter
+│   │   ├── src/
+│   │   │   ├── adapter.ts               # PostgreSQL SQL adapter
+│   │   │   ├── execute.ts               # Execution functions
+│   │   │   └── visitors/                # PostgreSQL-specific visitors
+│   │   └── tests/                       # Integration tests
+│   │
+│   ├── tinqer-sql-better-sqlite3/       # SQLite adapter
+│   │   ├── src/
+│   │   │   ├── adapter.ts               # SQLite SQL adapter
+│   │   │   ├── execute.ts               # Execution functions
+│   │   │   └── visitors/                # SQLite-specific visitors
+│   │   └── tests/                       # Integration tests
+│   │
+│   └── tinqer-sql-*/                    # Integration test packages
+│
+├── scripts/                             # Build and utility scripts
+│   ├── build.sh                         # Main build script
+│   ├── clean.sh                         # Clean build artifacts
+│   ├── lint-all.sh                      # Lint all packages
+│   └── format-all.sh                    # Format with Prettier
+│
+└── docs/                                # Documentation
+</code></pre>
+<hr>
+<h2 id="2-building" tabindex="-1"><a class="anchor" href="#2-building" aria-hidden="true">#</a> 2. Building</h2>
+<h3 id="21-build-commands" tabindex="-1"><a class="anchor" href="#21-build-commands" aria-hidden="true">#</a> 2.1 Build Commands</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Standard build with formatting</span>
+./scripts/build.sh
+
+<span class="hljs-comment"># Build without formatting (faster during development)</span>
+./scripts/build.sh --no-format
+
+<span class="hljs-comment"># Build specific package</span>
+<span class="hljs-built_in">cd</span> packages/tinqer
+npm run build
+</code></pre>
+<p><strong>Build Process:</strong></p>
+<ol>
+<li>Runs TypeScript compiler for each package</li>
+<li>Generates ES modules with <code>.js</code> extensions</li>
+<li>Runs Prettier formatting (unless <code>--no-format</code> is used)</li>
+<li>Outputs to <code>dist/</code> directories</li>
+</ol>
+<h3 id="22-clean-build" tabindex="-1"><a class="anchor" href="#22-clean-build" aria-hidden="true">#</a> 2.2 Clean Build</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Remove build artifacts</span>
+./scripts/clean.sh
+
+<span class="hljs-comment"># Remove build artifacts and node_modules</span>
+./scripts/clean.sh --all
+</code></pre>
+<hr>
+<h2 id="3-testing" tabindex="-1"><a class="anchor" href="#3-testing" aria-hidden="true">#</a> 3. Testing</h2>
+<h3 id="31-running-tests" tabindex="-1"><a class="anchor" href="#31-running-tests" aria-hidden="true">#</a> 3.1 Running Tests</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Run all tests</span>
+npm <span class="hljs-built_in">test</span>
+
+<span class="hljs-comment"># Run tests in watch mode</span>
+npm run <span class="hljs-built_in">test</span>:watch
+
+<span class="hljs-comment"># Run specific tests by pattern</span>
+npm run <span class="hljs-built_in">test</span>:grep -- <span class="hljs-string">&quot;WHERE operations&quot;</span>
+npm run <span class="hljs-built_in">test</span>:grep -- <span class="hljs-string">&quot;INSERT&quot;</span>
+npm run <span class="hljs-built_in">test</span>:grep -- <span class="hljs-string">&quot;JOIN&quot;</span>
+
+<span class="hljs-comment"># Run tests for specific package</span>
+<span class="hljs-built_in">cd</span> packages/tinqer
+npm <span class="hljs-built_in">test</span>
+</code></pre>
+<h3 id="32-test-organization" tabindex="-1"><a class="anchor" href="#32-test-organization" aria-hidden="true">#</a> 3.2 Test Organization</h3>
+<p><strong>Core Library Tests</strong> (<code>packages/tinqer/tests/</code>):</p>
+<ul>
+<li>Parser tests: Lambda expression parsing</li>
+<li>Converter tests: AST to expression tree conversion</li>
+<li>Queryable tests: Query builder API</li>
+<li>Type tests: TypeScript type inference</li>
+</ul>
+<p><strong>Integration Tests</strong> (<code>packages/tinqer-sql-*/tests/</code>):</p>
+<ul>
+<li>PostgreSQL integration: <code>tinqer-sql-pg-promise-integration/tests/</code></li>
+<li>SQLite integration: <code>tinqer-sql-better-sqlite3-integration/tests/</code></li>
+<li>Full end-to-end query execution tests</li>
+<li>Database-specific feature tests</li>
+</ul>
+<h3 id="33-writing-tests" tabindex="-1"><a class="anchor" href="#33-writing-tests" aria-hidden="true">#</a> 3.3 Writing Tests</h3>
+<p><strong>Unit Test Example:</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
+<span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;SQL Generation&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;should generate SQL with WHERE clause&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+      <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
+    }
+
+    <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+    <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>));
+
+    <span class="hljs-comment">// Assert SQL and parameters</span>
+    assert.<span class="hljs-title function_">ok</span>(result.<span class="hljs-property">sql</span>.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&quot;WHERE&quot;</span>));
+    assert.<span class="hljs-title function_">ok</span>(result.<span class="hljs-property">params</span>);
+  });
+});
+</code></pre>
+<p><strong>Integration Test Example:</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it, beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
+<span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelectSimple } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./shared-db.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;PostgreSQL Integration&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">none</span>(<span class="hljs-string">&quot;TRUNCATE TABLE users RESTART IDENTITY CASCADE&quot;</span>);
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">none</span>(<span class="hljs-string">&quot;INSERT INTO users (name, age) VALUES (&#x27;Alice&#x27;, 30), (&#x27;Bob&#x27;, 25)&quot;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;should execute SELECT query&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelectSimple</span>(db, schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+      q
+        .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+        .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">25</span>)
+        .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
+    );
+
+    assert.<span class="hljs-title function_">deepEqual</span>(results, [<span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-string">&quot;Bob&quot;</span>]);
+  });
+});
+</code></pre>
+<p><strong>Test Database Setup:</strong></p>
+<p>PostgreSQL tests use shared connection (<code>packages/tinqer-sql-pg-promise-integration/tests/shared-db.ts</code>):</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
+
+<span class="hljs-keyword">const</span> pgp = <span class="hljs-title function_">pgPromise</span>();
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">pgp</span>({
+  <span class="hljs-attr">host</span>: <span class="hljs-string">&quot;localhost&quot;</span>,
+  <span class="hljs-attr">port</span>: <span class="hljs-number">5432</span>,
+  <span class="hljs-attr">database</span>: <span class="hljs-string">&quot;tinqer_test&quot;</span>,
+  <span class="hljs-attr">user</span>: <span class="hljs-string">&quot;tinqer_test&quot;</span>,
+  <span class="hljs-attr">password</span>: <span class="hljs-string">&quot;tinqer_test&quot;</span>,
+});
+</code></pre>
+<p>SQLite tests use isolated in-memory databases:</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;SQLite Tests&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">db</span>: <span class="hljs-title class_">Database</span>.<span class="hljs-property">Database</span>;
+
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    db = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Database</span>(<span class="hljs-string">&quot;:memory:&quot;</span>);
+    <span class="hljs-comment">// Create schema and seed data</span>
+  });
+
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+    db.<span class="hljs-title function_">close</span>();
+  });
+});
+</code></pre>
+<hr>
+<h2 id="4-code-quality" tabindex="-1"><a class="anchor" href="#4-code-quality" aria-hidden="true">#</a> 4. Code Quality</h2>
+<h3 id="41-linting" tabindex="-1"><a class="anchor" href="#41-linting" aria-hidden="true">#</a> 4.1 Linting</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Lint all packages</span>
+./scripts/lint-all.sh
+
+<span class="hljs-comment"># Lint with auto-fix</span>
+./scripts/lint-all.sh --fix
+
+<span class="hljs-comment"># Lint specific package</span>
+<span class="hljs-built_in">cd</span> packages/tinqer
+npm run lint
+npm run lint:fix
+</code></pre>
+<p><strong>ESLint Configuration:</strong></p>
+<ul>
+<li><code>@typescript-eslint/no-explicit-any</code>: error (no <code>any</code> types allowed)</li>
+<li><code>@typescript-eslint/prefer-const</code>: error</li>
+<li>Strict type checking enabled</li>
+</ul>
+<h3 id="42-formatting" tabindex="-1"><a class="anchor" href="#42-formatting" aria-hidden="true">#</a> 4.2 Formatting</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Format all files with Prettier</span>
+./scripts/format-all.sh
+
+<span class="hljs-comment"># Check formatting without changes</span>
+./scripts/format-all.sh --check
+
+<span class="hljs-comment"># Format specific package</span>
+<span class="hljs-built_in">cd</span> packages/tinqer
+npm run format
+</code></pre>
+<p><strong>IMPORTANT:</strong> Always run <code>./scripts/format-all.sh</code> before committing.</p>
+<hr>
+<h2 id="5-contributing" tabindex="-1"><a class="anchor" href="#5-contributing" aria-hidden="true">#</a> 5. Contributing</h2>
+<h3 id="51-coding-standards" tabindex="-1"><a class="anchor" href="#51-coding-standards" aria-hidden="true">#</a> 5.1 Coding Standards</h3>
+<p><strong>TypeScript Guidelines:</strong></p>
+<ul>
+<li>
+<p><strong>No <code>any</code> types</strong>: All code must be strictly typed</p>
+</li>
+<li>
+<p><strong>Prefer <code>type</code> over <code>interface</code></strong>: Use <code>interface</code> only for extensible contracts</p>
+</li>
+<li>
+<p><strong>ESM imports</strong>: Always include <code>.js</code> extension in imports</p>
+<pre class="hljs"><code><span class="hljs-comment">// Correct</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Queryable</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./queryable/queryable.js&quot;</span>;
+
+<span class="hljs-comment">// Incorrect</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Queryable</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./queryable/queryable&quot;</span>;
+</code></pre>
+</li>
+<li>
+<p><strong>Pure functions</strong>: Prefer stateless functions with explicit dependency injection</p>
+</li>
+<li>
+<p><strong>No dynamic imports</strong>: Always use static imports</p>
+</li>
+</ul>
+<p><strong>Code Organization:</strong></p>
+<ul>
+<li>Export functions from modules when possible</li>
+<li>Use classes only for stateful connections or complex state management</li>
+<li>Keep files focused and single-purpose</li>
+<li>Write comprehensive JSDoc comments for public APIs</li>
+</ul>
+<h3 id="52-commit-guidelines" tabindex="-1"><a class="anchor" href="#52-commit-guidelines" aria-hidden="true">#</a> 5.2 Commit Guidelines</h3>
+<pre class="hljs"><code><span class="hljs-comment"># Before committing:</span>
+./scripts/format-all.sh  <span class="hljs-comment"># Format code</span>
+./scripts/lint-all.sh    <span class="hljs-comment"># Check linting</span>
+./scripts/build.sh       <span class="hljs-comment"># Build all packages</span>
+npm <span class="hljs-built_in">test</span>                 <span class="hljs-comment"># Run all tests</span>
+
+<span class="hljs-comment"># Commit with descriptive message</span>
+git add .
+git commit -m <span class="hljs-string">&quot;feat: add support for window functions&quot;</span>
+</code></pre>
+<p><strong>Commit Message Format:</strong></p>
+<ul>
+<li><code>feat:</code> - New features</li>
+<li><code>fix:</code> - Bug fixes</li>
+<li><code>refactor:</code> - Code refactoring</li>
+<li><code>test:</code> - Test additions or changes</li>
+<li><code>docs:</code> - Documentation changes</li>
+<li><code>chore:</code> - Build process or tooling changes</li>
+</ul>
+<h3 id="53-pull-requests" tabindex="-1"><a class="anchor" href="#53-pull-requests" aria-hidden="true">#</a> 5.3 Pull Requests</h3>
+<ol>
+<li>
+<p><strong>Create feature branch:</strong></p>
+<pre class="hljs"><code>git checkout -b feat/my-feature
+</code></pre>
+</li>
+<li>
+<p><strong>Make changes and test:</strong></p>
+<pre class="hljs"><code>./scripts/format-all.sh
+./scripts/lint-all.sh
+./scripts/build.sh
+npm <span class="hljs-built_in">test</span>
+</code></pre>
+</li>
+<li>
+<p><strong>Push and create PR:</strong></p>
+<pre class="hljs"><code>git push -u origin feat/my-feature
+<span class="hljs-comment"># Create PR on GitHub</span>
+</code></pre>
+</li>
+<li>
+<p><strong>PR Requirements:</strong></p>
+<ul>
+<li>All tests passing</li>
+<li>Code formatted and linted</li>
+<li>Documentation updated</li>
+<li>Clear description of changes</li>
+<li>Type safety maintained</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="6-troubleshooting" tabindex="-1"><a class="anchor" href="#6-troubleshooting" aria-hidden="true">#</a> 6. Troubleshooting</h2>
+<h3 id="61-common-issues" tabindex="-1"><a class="anchor" href="#61-common-issues" aria-hidden="true">#</a> 6.1 Common Issues</h3>
+<p><strong>Issue: Build Fails with Module Resolution Errors</strong></p>
+<pre class="hljs"><code>Error: Cannot find module './queryable.js'
+</code></pre>
+<p><strong>Solution:</strong> Ensure all imports include <code>.js</code> extension:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Incorrect</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Queryable</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./queryable&quot;</span>;
+
+<span class="hljs-comment">// Correct</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Queryable</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./queryable.js&quot;</span>;
+</code></pre>
+<p><strong>Issue: Tests Fail with Connection Pool Destroyed</strong></p>
+<pre class="hljs"><code>Error: Connection pool has been destroyed
+</code></pre>
+<p><strong>Solution:</strong> Use shared database connection, don’t call <code>pgp.end()</code> in tests:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Correct</span>
+<span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./shared-db.js&quot;</span>;
+
+<span class="hljs-comment">// Incorrect - don&#x27;t create new pgp instances in tests</span>
+<span class="hljs-keyword">const</span> pgp = <span class="hljs-title function_">pgPromise</span>();
+<span class="hljs-keyword">const</span> db = <span class="hljs-title function_">pgp</span>({...});
+pgp.<span class="hljs-title function_">end</span>(); <span class="hljs-comment">// This destroys the global pool!</span>
+</code></pre>
+<p><strong>Issue: SQLite Boolean Type Errors</strong></p>
+<pre class="hljs"><code>TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null
+</code></pre>
+<p><strong>Solution:</strong> Use <code>number</code> type (0/1) for boolean columns in SQLite schemas:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Correct for SQLite</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: {
+    <span class="hljs-attr">is_active</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// Use 0 for false, 1 for true</span>
+  };
+}
+
+<span class="hljs-comment">// Incorrect for SQLite</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: {
+    <span class="hljs-attr">is_active</span>: <span class="hljs-built_in">boolean</span>; <span class="hljs-comment">// SQLite doesn&#x27;t have boolean type</span>
+  };
+}
+</code></pre>
+<h3 id="62-parser-errors" tabindex="-1"><a class="anchor" href="#62-parser-errors" aria-hidden="true">#</a> 6.2 Parser Errors</h3>
+<p><strong>Issue: Unsupported AST Node Type</strong></p>
+<pre class="hljs"><code>Error: Unsupported AST node type: TemplateLiteral
+</code></pre>
+<p><strong>Solution:</strong> Use params pattern for dynamic values:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Incorrect - template literal in lambda</span>
+.<span class="hljs-title function_">where</span>(<span class="hljs-function"><span class="hljs-params">u</span> =&gt;</span> u.<span class="hljs-property">name</span> === <span class="hljs-string">`User <span class="hljs-subst">${userId}</span>`</span>)
+
+<span class="hljs-comment">// Correct - use params with executeSelectSimple</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelectSimple</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span> === p.<span class="hljs-property">name</span>),
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">`User <span class="hljs-subst">${userId}</span>`</span> }
+);
+</code></pre>
+<p><strong>Issue: Unknown Identifier</strong></p>
+<pre class="hljs"><code>Error: Unknown identifier 'externalVar'
+</code></pre>
+<p><strong>Solution:</strong> Pass external variables via params object:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Incorrect - closure variable</span>
+<span class="hljs-keyword">const</span> minAge = <span class="hljs-number">18</span>;
+.<span class="hljs-title function_">where</span>(<span class="hljs-function"><span class="hljs-params">u</span> =&gt;</span> u.<span class="hljs-property">age</span> &gt;= minAge)
+
+<span class="hljs-comment">// Correct - params pattern with executeSelectSimple</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelectSimple</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span>),
+  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> }
+);
+</code></pre>
+<h3 id="63-type-errors" tabindex="-1"><a class="anchor" href="#63-type-errors" aria-hidden="true">#</a> 6.3 Type Errors</h3>
+<p><strong>Issue: Type Inference Not Working</strong></p>
+<pre class="hljs"><code><span class="hljs-comment">// Type inference fails without schema context</span>
+<span class="hljs-keyword">const</span> schema = <span class="hljs-title function_">createSchema</span>(); <span class="hljs-comment">// No schema type provided</span>
+
+<span class="hljs-comment">// Types will be &#x27;unknown&#x27; without schema</span>
+<span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>), <span class="hljs-comment">// Type is Queryable&lt;unknown&gt;</span>
+);
+</code></pre>
+<p><strong>Solution:</strong> Provide explicit schema type to createSchema:</p>
+<pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Now fully typed from schema</span>
+<span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>), <span class="hljs-comment">// Fully typed: Queryable&lt;{ id: number; name: string }&gt;</span>
+);
+</code></pre>
+<p><strong>Issue: Property Does Not Exist</strong></p>
+<pre class="hljs"><code>Property 'email' does not exist on type '{ id: number; name: string }'
+</code></pre>
+<p><strong>Solution:</strong> Ensure schema definition includes all columns:</p>
+<pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: {
+    <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+    <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+    <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Add missing column</span>
+  };
+}
+</code></pre>
+<hr>
+<h2 id="development-workflow" tabindex="-1"><a class="anchor" href="#development-workflow" aria-hidden="true">#</a> Development Workflow</h2>
+<p><strong>Typical Development Cycle:</strong></p>
+<ol>
+<li><strong>Make changes</strong> to source files</li>
+<li><strong>Run linter</strong>: <code>./scripts/lint-all.sh --fix</code></li>
+<li><strong>Build</strong>: <code>./scripts/build.sh --no-format</code> (skip formatting for speed)</li>
+<li><strong>Run specific tests</strong>: <code>npm run test:grep -- &quot;your feature&quot;</code></li>
+<li><strong>Iterate</strong> until tests pass</li>
+<li><strong>Run full test suite</strong>: <code>npm test</code></li>
+<li><strong>Format code</strong>: <code>./scripts/format-all.sh</code></li>
+<li><strong>Final build</strong>: <code>./scripts/build.sh</code></li>
+<li><strong>Commit changes</strong></li>
+</ol>
+<p><strong>Debugging Tips:</strong></p>
+<ul>
+<li>Use <code>npm run test:grep -- &quot;pattern&quot;</code> to focus on specific tests</li>
+<li>Check <code>.tests/</code> directory for saved test output (gitignored)</li>
+<li>Use TypeScript’s <code>tsc --noEmit</code> to check types without building</li>
+<li>Enable verbose logging in tests with <code>DEBUG=* npm test</code></li>
+</ul>
+<hr>
+<p><a href="../README.md">← Back to README</a></p>
+
+      </article>
+
+      <nav class="toc">
+<h2>On This Page</h2>
+<ul>
+  <li><a href="#table-of-contents">Table of Contents</a></li>
+  <li><a href="#1-getting-started">1. Getting Started</a></li>
+  <li class="toc-sub"><a href="#11-prerequisites">1.1 Prerequisites</a></li>
+  <li class="toc-sub"><a href="#12-installation">1.2 Installation</a></li>
+  <li class="toc-sub"><a href="#13-project-structure">1.3 Project Structure</a></li>
+  <li><a href="#2-building">2. Building</a></li>
+  <li class="toc-sub"><a href="#21-build-commands">2.1 Build Commands</a></li>
+  <li class="toc-sub"><a href="#22-clean-build">2.2 Clean Build</a></li>
+  <li><a href="#3-testing">3. Testing</a></li>
+  <li class="toc-sub"><a href="#31-running-tests">3.1 Running Tests</a></li>
+  <li class="toc-sub"><a href="#32-test-organization">3.2 Test Organization</a></li>
+  <li class="toc-sub"><a href="#33-writing-tests">3.3 Writing Tests</a></li>
+  <li><a href="#4-code-quality">4. Code Quality</a></li>
+  <li class="toc-sub"><a href="#41-linting">4.1 Linting</a></li>
+  <li class="toc-sub"><a href="#42-formatting">4.2 Formatting</a></li>
+  <li><a href="#5-contributing">5. Contributing</a></li>
+  <li class="toc-sub"><a href="#51-coding-standards">5.1 Coding Standards</a></li>
+  <li class="toc-sub"><a href="#52-commit-guidelines">5.2 Commit Guidelines</a></li>
+  <li class="toc-sub"><a href="#53-pull-requests">5.3 Pull Requests</a></li>
+  <li><a href="#6-troubleshooting">6. Troubleshooting</a></li>
+  <li class="toc-sub"><a href="#61-common-issues">6.1 Common Issues</a></li>
+  <li class="toc-sub"><a href="#62-parser-errors">6.2 Parser Errors</a></li>
+  <li class="toc-sub"><a href="#63-type-errors">6.3 Type Errors</a></li>
+  <li><a href="#development-workflow">Development Workflow</a></li>
+</ul>
+</nav>
+    </div>
+
+    <footer class="page-nav">
+  <a href="adapters.html" class="prev">← Adapters</a>
+  <a href="architecture.html" class="next">Architecture →</a>
+</footer>
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        hamburger.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', closeMenu);
+
+      // Close menu when clicking a nav link
+      const navLinks = sidebar.querySelectorAll('.nav-list a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
