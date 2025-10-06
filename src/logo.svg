@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Octopus body -->
+  <ellipse cx="50" cy="35" rx="22" ry="18" fill="#0969da" />
+
+  <!-- Head spot -->
+  <ellipse cx="50" cy="30" rx="12" ry="10" fill="#0550ae" />
+
+  <!-- Eyes -->
+  <circle cx="43" cy="32" r="4" fill="white" />
+  <circle cx="57" cy="32" r="4" fill="white" />
+  <circle cx="44" cy="32" r="2" fill="#1f2328" />
+  <circle cx="58" cy="32" r="2" fill="#1f2328" />
+
+  <!-- Quirky smile -->
+  <path d="M 45 40 Q 50 43 55 40" stroke="#1f2328" stroke-width="2" fill="none" stroke-linecap="round" />
+
+  <!-- Tentacles (8 of them, whimsically curved) -->
+  <!-- Left tentacles -->
+  <path d="M 32 45 Q 20 50 18 60 T 15 75" stroke="#0969da" stroke-width="4" fill="none" stroke-linecap="round" />
+  <path d="M 36 47 Q 25 55 22 65 T 20 80" stroke="#0969da" stroke-width="4" fill="none" stroke-linecap="round" />
+  <path d="M 40 48 Q 32 58 30 68 T 28 85" stroke="#0969da" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+  <!-- Center-left tentacle -->
+  <path d="M 44 50 Q 40 62 38 75 T 40 90" stroke="#0969da" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+  <!-- Center-right tentacle -->
+  <path d="M 56 50 Q 60 62 62 75 T 60 90" stroke="#0969da" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+  <!-- Right tentacles -->
+  <path d="M 60 48 Q 68 58 70 68 T 72 85" stroke="#0969da" stroke-width="3.5" fill="none" stroke-linecap="round" />
+  <path d="M 64 47 Q 75 55 78 65 T 80 80" stroke="#0969da" stroke-width="4" fill="none" stroke-linecap="round" />
+  <path d="M 68 45 Q 80 50 82 60 T 85 75" stroke="#0969da" stroke-width="4" fill="none" stroke-linecap="round" />
+
+  <!-- Tentacle suckers (little circles) -->
+  <circle cx="17" cy="65" r="1.5" fill="#0550ae" />
+  <circle cx="15" cy="72" r="1.5" fill="#0550ae" />
+  <circle cx="23" cy="68" r="1.5" fill="#0550ae" />
+  <circle cx="21" cy="75" r="1.5" fill="#0550ae" />
+  <circle cx="31" cy="72" r="1.5" fill="#0550ae" />
+  <circle cx="29" cy="80" r="1.5" fill="#0550ae" />
+
+  <circle cx="83" cy="65" r="1.5" fill="#0550ae" />
+  <circle cx="85" cy="72" r="1.5" fill="#0550ae" />
+  <circle cx="77" cy="68" r="1.5" fill="#0550ae" />
+  <circle cx="79" cy="75" r="1.5" fill="#0550ae" />
+  <circle cx="69" cy="72" r="1.5" fill="#0550ae" />
+  <circle cx="71" cy="80" r="1.5" fill="#0550ae" />
+
+  <!-- Quirky antenna/hair tuft on top -->
+  <path d="M 48 20 Q 45 12 42 8" stroke="#0969da" stroke-width="2" fill="none" stroke-linecap="round" />
+  <circle cx="42" cy="7" r="2" fill="#0969da" />
+
+  <path d="M 52 20 Q 55 12 58 8" stroke="#0969da" stroke-width="2" fill="none" stroke-linecap="round" />
+  <circle cx="58" cy="7" r="2" fill="#0969da" />
+</svg>

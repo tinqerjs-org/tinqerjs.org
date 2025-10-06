@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tinqer - Type-safe LINQ-to-SQL query builder for TypeScript">
+  <title>{{TITLE}} - Tinqer Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <a href="index.html" class="mobile-logo">
+      <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+      <span>Tinqer</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="overlay"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+        <span>Tinqer</span>
+      </a>
+      <p class="tagline">Type-safe LINQ-to-SQL for TypeScript</p>
+    </div>
+    {{NAV}}
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    {{BREADCRUMB}}
+
+    <div class="content-wrapper">
+      <article class="markdown-body">
+        {{CONTENT}}
+      </article>
+
+      {{TOC}}
+    </div>
+
+    {{PAGE_NAV}}
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        hamburger.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', closeMenu);
+
+      // Close menu when clicking a nav link
+      const navLinks = sidebar.querySelectorAll('.nav-list a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

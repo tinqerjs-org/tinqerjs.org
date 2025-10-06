@@ -1,0 +1,876 @@
+/* ============================================
+   CSS Reset & Base Styles
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Colors */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f6f8fa;
+  --color-bg-tertiary: #f0f3f6;
+  --color-text: #1f2328;
+  --color-text-secondary: #656d76;
+  --color-border: #d0d7de;
+  --color-border-subtle: #e7ebef;
+  --color-accent: #0969da;
+  --color-accent-hover: #0550ae;
+
+  /* Code colors (GitHub light theme) */
+  --color-code-bg: #f6f8fa;
+  --color-code-border: #d0d7de;
+  --color-inline-code-bg: rgba(175, 184, 193, 0.2);
+  --color-inline-code-text: #24292f;
+
+  /* Spacing */
+  --space-unit: 8px;
+  --space-xs: calc(var(--space-unit) * 1); /* 8px */
+  --space-sm: calc(var(--space-unit) * 2); /* 16px */
+  --space-md: calc(var(--space-unit) * 3); /* 24px */
+  --space-lg: calc(var(--space-unit) * 4); /* 32px */
+  --space-xl: calc(var(--space-unit) * 6); /* 48px */
+  --space-2xl: calc(var(--space-unit) * 8); /* 64px */
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --content-max-width: 780px;
+  --toc-width: 240px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+                 Helvetica, Arial, sans-serif;
+  --font-family-mono: ui-monospace, "Cascadia Code", "Source Code Pro",
+                      Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --font-size-base: 16px;
+  --line-height-base: 1.6;
+}
+
+html {
+  font-size: var(--font-size-base);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ============================================
+   Sidebar Navigation
+   ============================================ */
+
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-bg);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-md);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+  letter-spacing: -0.02em;
+}
+
+.logo:hover {
+  color: var(--color-accent);
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.tagline {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.nav-list {
+  list-style: none;
+}
+
+.nav-list li {
+  margin-bottom: var(--space-xs);
+}
+
+.nav-list a {
+  display: block;
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background-color 0.15s ease;
+}
+
+.nav-list a:hover {
+  background: var(--color-bg-secondary);
+}
+
+.nav-list li.active a {
+  background: var(--color-bg-secondary);
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+/* ============================================
+   Main Content Area
+   ============================================ */
+
+.content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  padding: var(--space-lg) var(--space-xl);
+  max-width: calc(var(--content-max-width) + var(--toc-width) + var(--space-xl) * 2);
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.breadcrumb a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+}
+
+.markdown-body {
+  flex: 1;
+  max-width: var(--content-max-width);
+  min-width: 0; /* Prevents flex overflow */
+}
+
+/* ============================================
+   Table of Contents (right side)
+   ============================================ */
+
+.toc {
+  width: var(--toc-width);
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--space-lg);
+  font-size: 13px;
+}
+
+.toc h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.toc ul {
+  list-style: none;
+}
+
+.toc li {
+  margin-bottom: var(--space-xs);
+}
+
+.toc li.toc-sub {
+  padding-left: var(--space-sm);
+}
+
+.toc a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  line-height: 1.4;
+  display: block;
+  transition: color 0.15s ease;
+}
+
+.toc a:hover {
+  color: var(--color-accent);
+}
+
+/* ============================================
+   Typography - Headings
+   ============================================ */
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.markdown-body h1 {
+  font-size: 36px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-md);
+}
+
+.markdown-body h2 {
+  font-size: 28px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-sm);
+}
+
+.markdown-body h3 {
+  font-size: 22px;
+}
+
+.markdown-body h4 {
+  font-size: 18px;
+}
+
+.markdown-body h5,
+.markdown-body h6 {
+  font-size: 16px;
+}
+
+/* Anchor links */
+.anchor {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  opacity: 0;
+  padding-right: var(--space-xs);
+  transition: opacity 0.15s ease;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor {
+  opacity: 1;
+}
+
+/* ============================================
+   Typography - Body Text
+   ============================================ */
+
+.markdown-body p {
+  margin-bottom: var(--space-md);
+  line-height: 1.7;
+}
+
+.markdown-body a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+/* ============================================
+   Lists
+   ============================================ */
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.markdown-body li {
+  margin-bottom: var(--space-xs);
+  line-height: 1.7;
+}
+
+.markdown-body li > ul,
+.markdown-body li > ol {
+  margin-top: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+/* ============================================
+   Code Blocks - Beautiful Formatting
+   ============================================ */
+
+.markdown-body code {
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
+
+/* Inline code */
+.markdown-body :not(pre) > code {
+  background: var(--color-inline-code-bg);
+  color: var(--color-inline-code-text);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
+/* Code blocks */
+.markdown-body pre {
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-code-border);
+  border-radius: 6px;
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  overflow-x: auto;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: inherit;
+  color: var(--color-text);
+  display: block;
+}
+
+/* Syntax highlighting - GitHub Light theme */
+.hljs {
+  color: #24292f;
+  background: var(--color-code-bg);
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+  color: #cf222e;
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+  color: #8250df;
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-variable {
+  color: #0550ae;
+}
+
+.hljs-meta .hljs-string,
+.hljs-regexp,
+.hljs-string {
+  color: #0a3069;
+}
+
+.hljs-built_in,
+.hljs-symbol {
+  color: #953800;
+}
+
+.hljs-code,
+.hljs-comment,
+.hljs-formula {
+  color: #656d76;
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-pseudo,
+.hljs-selector-tag {
+  color: #116329;
+}
+
+.hljs-subst {
+  color: #24292f;
+}
+
+.hljs-section {
+  color: #0550ae;
+  font-weight: 700;
+}
+
+.hljs-bullet {
+  color: #953800;
+}
+
+.hljs-emphasis {
+  color: #24292f;
+  font-style: italic;
+}
+
+.hljs-strong {
+  color: #24292f;
+  font-weight: 700;
+}
+
+.hljs-addition {
+  color: #116329;
+  background-color: #dafbe1;
+}
+
+.hljs-deletion {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: var(--space-md);
+  font-size: 14px;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm);
+  text-align: left;
+}
+
+.markdown-body table th {
+  background: var(--color-bg-secondary);
+  font-weight: 600;
+}
+
+.markdown-body table tr:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* ============================================
+   Blockquotes
+   ============================================ */
+
+.markdown-body blockquote {
+  padding-left: var(--space-md);
+  border-left: 4px solid var(--color-border);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+/* ============================================
+   Horizontal Rules
+   ============================================ */
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-xl) 0;
+}
+
+/* ============================================
+   Page Navigation (prev/next)
+   ============================================ */
+
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border-subtle);
+  gap: var(--space-md);
+}
+
+.page-nav a {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 14px;
+  transition: all 0.15s ease;
+  flex: 0 1 auto;
+  max-width: 45%;
+}
+
+.page-nav a:hover {
+  background: var(--color-bg);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.page-nav a.prev {
+  text-align: left;
+}
+
+.page-nav a.next {
+  text-align: right;
+  margin-left: auto;
+}
+
+/* ============================================
+   Mobile Header & Hamburger Menu
+   ============================================ */
+
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 var(--space-md);
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.mobile-logo {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.mobile-logo .logo-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 101;
+}
+
+.hamburger:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 3px;
+  background: var(--color-text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 960px) {
+  /* Don't hide horizontal overflow - we need it for code blocks */
+  html, body {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Account for fixed header when jumping to anchors */
+  html {
+    scroll-padding-top: 80px; /* Mobile header height + buffer */
+  }
+
+  body {
+    padding-top: 60px; /* Height of mobile header */
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .mobile-overlay {
+    display: block;
+  }
+
+  .toc {
+    display: none;
+  }
+
+  .content-wrapper {
+    display: block;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 99;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0;
+    padding: var(--space-sm);
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .content-wrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .markdown-body {
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Headings must wrap */
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3,
+  .markdown-body h4,
+  .markdown-body h5,
+  .markdown-body h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .markdown-body h1 {
+    font-size: 24px;
+  }
+
+  .markdown-body h2 {
+    font-size: 20px;
+  }
+
+  .markdown-body h3 {
+    font-size: 18px;
+  }
+
+  .markdown-body h4,
+  .markdown-body h5,
+  .markdown-body h6 {
+    font-size: 16px;
+  }
+
+  /* Tables can scroll horizontally */
+  .markdown-body table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Code blocks MUST scroll horizontally */
+  .markdown-body pre {
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    font-size: 12px;
+    padding: var(--space-sm);
+    width: calc(100vw - var(--space-sm) * 2);
+    max-width: 100%;
+    box-sizing: border-box;
+    display: block;
+  }
+
+  .markdown-body pre code {
+    white-space: pre !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    display: block;
+  }
+
+  /* All text content must wrap */
+  .markdown-body p,
+  .markdown-body li,
+  .markdown-body a,
+  .markdown-body span,
+  .markdown-body div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Inline code should wrap if too long */
+  .markdown-body :not(pre) > code {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* Links must wrap */
+  .markdown-body a {
+    word-break: break-word;
+  }
+
+  /* Improve touch targets for navigation */
+  .nav-list a {
+    padding: var(--space-sm);
+    font-size: 16px;
+  }
+
+  /* Make page navigation stack on mobile */
+  .page-nav {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .page-nav a {
+    max-width: 100%;
+    text-align: center !important;
+  }
+
+  .page-nav a.next {
+    margin-left: 0;
+  }
+
+  /* Smaller spacing on mobile */
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+  }
+
+  /* Tighter heading spacing on mobile */
+  .markdown-body h1,
+  .markdown-body h2,
+  .markdown-body h3,
+  .markdown-body h4,
+  .markdown-body h5,
+  .markdown-body h6 {
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  /* Ensure lists wrap */
+  .markdown-body ul,
+  .markdown-body ol {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .sidebar,
+  .toc,
+  .breadcrumb,
+  .page-nav {
+    display: none;
+  }
+
+  .content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .markdown-body {
+    max-width: 100%;
+  }
+
+  .markdown-body a {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+}
