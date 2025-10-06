@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tinqer - Type-safe LINQ-to-SQL query builder for TypeScript">
+  <title>API Reference - Tinqer Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <a href="index.html" class="mobile-logo">
+      <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+      <span>Tinqer</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="overlay"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+        <span>Tinqer</span>
+      </a>
+      <p class="tagline">Type-safe LINQ-to-SQL for TypeScript</p>
+    </div>
+    <ul class="nav-list">
+  <li><a href="index.html">Getting Started</a></li>
+  <li><a href="guide.html">Guide</a></li>
+  <li class="active"><a href="api-reference.html">API Reference</a></li>
+  <li><a href="adapters.html">Adapters</a></li>
+  <li><a href="development.html">Development</a></li>
+  <li><a href="architecture.html">Architecture</a></li>
+</ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <span>API Reference</span></div>
+
+    <div class="content-wrapper">
+      <article class="markdown-body">
+        <p><a href="../README.md">← Back to README</a></p>
+<h1 id="tinqer-api-reference" tabindex="-1"><a class="anchor" href="#tinqer-api-reference" aria-hidden="true">#</a> Tinqer API Reference</h1>
+<p>Reference for adapter execution helpers, typed contexts, and query utilities.</p>
+<h2 id="table-of-contents" tabindex="-1"><a class="anchor" href="#table-of-contents" aria-hidden="true">#</a> Table of Contents</h2>
+<ul>
+<li><a href="#1-execution-apis">1. Execution APIs</a>
+<ul>
+<li><a href="#11-selectstatement">1.1 selectStatement</a></li>
+<li><a href="#12-executeselect">1.2 executeSelect</a></li>
+<li><a href="#13-executeselectsimple">1.3 executeSelectSimple</a></li>
+<li><a href="#14-insertstatement--executeinsert">1.4 insertStatement &amp; executeInsert</a></li>
+<li><a href="#15-updatestatement--executeupdate">1.5 updateStatement &amp; executeUpdate</a></li>
+<li><a href="#16-deletestatement--executedelete">1.6 deleteStatement &amp; executeDelete</a></li>
+<li><a href="#17-tosql">1.7 toSql</a></li>
+<li><a href="#18-executeoptions--sqlresult">1.8 ExecuteOptions &amp; SqlResult</a></li>
+</ul>
+</li>
+<li><a href="#2-type-safe-contexts">2. Type-Safe Contexts</a>
+<ul>
+<li><a href="#21-createcontext">2.1 createSchema</a></li>
+</ul>
+</li>
+<li><a href="#3-helper-utilities">3. Helper Utilities</a>
+<ul>
+<li><a href="#31-createqueryhelpers">3.1 createQueryHelpers</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="1-execution-apis" tabindex="-1"><a class="anchor" href="#1-execution-apis" aria-hidden="true">#</a> 1. Execution APIs</h2>
+<p>Adapter packages export the runtime helpers that turn expression trees into SQL and execute them. PostgreSQL helpers live in <code>@webpods/tinqer-sql-pg-promise</code>; SQLite helpers live in <code>@webpods/tinqer-sql-better-sqlite3</code> and expose the same signatures.</p>
+<h3 id="11-selectstatement" tabindex="-1"><a class="anchor" href="#11-selectstatement" aria-hidden="true">#</a> 1.1 selectStatement</h3>
+<p>Converts a query builder function into SQL and named parameters without executing it. The query builder receives a DSL context, parameters, and helper functions.</p>
+<p><strong>Signature</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> selectStatement&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">OrderedQueryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">TParams</span> &amp; <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-title class_">TResult</span>&gt;;
+</code></pre>
+<p><strong>Example (PostgreSQL)</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">selectStatement</span>(
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span>)
+      .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
+);
+<span class="hljs-comment">// sql: SELECT &quot;id&quot; AS &quot;id&quot;, &quot;name&quot; AS &quot;name&quot; FROM &quot;users&quot; WHERE &quot;age&quot; &gt;= $(minAge)</span>
+<span class="hljs-comment">// params: { minAge: 18 }</span>
+</code></pre>
+<h3 id="12-executeselect" tabindex="-1"><a class="anchor" href="#12-executeselect" aria-hidden="true">#</a> 1.2 executeSelect</h3>
+<p>Executes a query builder against the database and returns typed results. The query builder receives a DSL context, parameters, and helper functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeSelect&lt;
+  <span class="hljs-title class_">TSchema</span>,
+  <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-built_in">unknown</span>&gt; | <span class="hljs-title class_">OrderedQueryable</span>&lt;<span class="hljs-built_in">unknown</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-built_in">unknown</span>&gt;,
+&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;, <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>, <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span></span>) =&gt;</span> <span class="hljs-title class_">TQuery</span>,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;
+  <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Queryable</span>&lt;infer T&gt;
+    ? T[]
+    : <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">OrderedQueryable</span>&lt;infer T&gt;
+      ? T[]
+      : <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TerminalQuery</span>&lt;infer T&gt;
+        ? T
+        : <span class="hljs-built_in">never</span>
+&gt;;
+</code></pre>
+<p><strong>Example (PostgreSQL)</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span>)
+      .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
+  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">21</span> },
+);
+</code></pre>
+<h3 id="13-executeselectsimple" tabindex="-1"><a class="anchor" href="#13-executeselectsimple" aria-hidden="true">#</a> 1.3 executeSelectSimple</h3>
+<p>Convenience wrapper for queries that do not need external parameters. The query builder receives a DSL context, an empty params object, and helper functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeSelectSimple&lt;
+  <span class="hljs-title class_">TSchema</span>,
+  <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-built_in">unknown</span>&gt; | <span class="hljs-title class_">OrderedQueryable</span>&lt;<span class="hljs-built_in">unknown</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-built_in">unknown</span>&gt;,
+&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">never</span>&gt;,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">TQuery</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;
+  <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Queryable</span>&lt;infer T&gt;
+    ? T[]
+    : <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">OrderedQueryable</span>&lt;infer T&gt;
+      ? T[]
+      : <span class="hljs-title class_">TQuery</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TerminalQuery</span>&lt;infer T&gt;
+        ? T
+        : <span class="hljs-built_in">never</span>
+&gt;;
+</code></pre>
+<p><strong>Example</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelectSimple } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> allUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelectSimple</span>(db, schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>));
+</code></pre>
+<h3 id="14-insertstatement-%26-executeinsert" tabindex="-1"><a class="anchor" href="#14-insertstatement-%26-executeinsert" aria-hidden="true">#</a> 1.4 insertStatement &amp; executeInsert</h3>
+<p>Generate and execute INSERT statements with optional RETURNING clauses. The query builder receives a DSL context, parameters, and helper functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> insertStatement&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span> = <span class="hljs-built_in">never</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Insertable</span>&lt;<span class="hljs-title class_">TTable</span>&gt; | <span class="hljs-title class_">InsertableWithReturning</span>&lt;<span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">TParams</span> &amp; <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-title class_">TReturning</span> <span class="hljs-keyword">extends</span> <span class="hljs-built_in">never</span> ? <span class="hljs-built_in">void</span> : <span class="hljs-title class_">TReturning</span>&gt;;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeInsert&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Insertable</span>&lt;<span class="hljs-title class_">TTable</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeInsert&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">InsertableWithReturning</span>&lt;<span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TReturning</span>[]&gt;;
+</code></pre>
+<p><strong>Example</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeInsert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> inserted = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span> }),
+  {},
+);
+
+<span class="hljs-keyword">const</span> createdUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Bob&quot;</span> })
+      .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+  {},
+);
+</code></pre>
+<h3 id="15-updatestatement-%26-executeupdate" tabindex="-1"><a class="anchor" href="#15-updatestatement-%26-executeupdate" aria-hidden="true">#</a> 1.5 updateStatement &amp; executeUpdate</h3>
+<p>Generate and execute UPDATE statements with optional RETURNING clauses. The query builder receives a DSL context, parameters, and helper functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> updateStatement&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span> = <span class="hljs-built_in">never</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span>
+    | <span class="hljs-title class_">UpdatableWithSet</span>&lt;<span class="hljs-title class_">TTable</span>&gt;
+    | <span class="hljs-title class_">UpdatableComplete</span>&lt;<span class="hljs-title class_">TTable</span>&gt;
+    | <span class="hljs-title class_">UpdatableWithReturning</span>&lt;<span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">TParams</span> &amp; <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-title class_">TReturning</span> <span class="hljs-keyword">extends</span> <span class="hljs-built_in">never</span> ? <span class="hljs-built_in">void</span> : <span class="hljs-title class_">TReturning</span>&gt;;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeUpdate&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">UpdatableWithSet</span>&lt;<span class="hljs-title class_">TTable</span>&gt; | <span class="hljs-title class_">UpdatableComplete</span>&lt;<span class="hljs-title class_">TTable</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeUpdate&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">UpdatableWithReturning</span>&lt;<span class="hljs-title class_">TTable</span>, <span class="hljs-title class_">TReturning</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TReturning</span>[]&gt;;
+</code></pre>
+<p><strong>Example</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeUpdate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">lastLogin</span>: <span class="hljs-title class_">Date</span>; <span class="hljs-attr">status</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> updatedRows = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; p.<span class="hljs-property">cutoff</span>),
+  { <span class="hljs-attr">cutoff</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2024-01-01&quot;</span>) },
+);
+</code></pre>
+<h3 id="16-deletestatement-%26-executedelete" tabindex="-1"><a class="anchor" href="#16-deletestatement-%26-executedelete" aria-hidden="true">#</a> 1.6 deleteStatement &amp; executeDelete</h3>
+<p>Generate and execute DELETE statements. The query builder receives a DSL context, parameters, and helper functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> deleteStatement&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Deletable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">DeletableComplete</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">TParams</span> &amp; <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-built_in">void</span>&gt;;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> executeDelete&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">db</span>: <span class="hljs-title class_">PgDatabase</span> | <span class="hljs-title class_">BetterSqlite3Database</span>,
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">ctx</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">QueryHelpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Deletable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">DeletableComplete</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ExecuteOptions</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+</code></pre>
+<p><strong>Example</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">status</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;inactive&quot;</span>),
+  {},
+);
+</code></pre>
+<h3 id="17-statement-functions-(selectstatement%2C-insertstatement%2C-etc)" tabindex="-1"><a class="anchor" href="#17-statement-functions-(selectstatement%2C-insertstatement%2C-etc)" aria-hidden="true">#</a> 1.7 Statement Functions (selectStatement, insertStatement, etc.)</h3>
+<p>Generate SQL and parameters without executing them. These functions are useful for debugging, testing, or when you need the SQL before execution.</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> selectStatement&lt;<span class="hljs-title class_">TSchema</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">builder</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">q</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;</span>) =&gt;</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+): <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-title class_">TResult</span>&gt;;
+</code></pre>
+<p><strong>Example (SQLite)</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">products</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">price</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">inStock</span>: <span class="hljs-built_in">number</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Generate SQL without executing</span>
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;products&quot;</span>)
+    .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> p.<span class="hljs-property">inStock</span> === <span class="hljs-number">1</span>)
+    .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> p.<span class="hljs-property">price</span>),
+);
+
+<span class="hljs-comment">// result.sql contains the SQL string</span>
+<span class="hljs-comment">// result.params contains the parameters</span>
+</code></pre>
+<h3 id="18-executeoptions-%26-sqlresult" tabindex="-1"><a class="anchor" href="#18-executeoptions-%26-sqlresult" aria-hidden="true">#</a> 1.8 ExecuteOptions &amp; SqlResult</h3>
+<p>Both adapters expose <code>ExecuteOptions</code> and <code>SqlResult</code> for inspection and typing.</p>
+<pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ExecuteOptions</span> {
+  <span class="hljs-attr">onSql</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">result</span>: <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-built_in">unknown</span>&gt;</span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">SqlResult</span>&lt;<span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt; {
+  <span class="hljs-attr">sql</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>;
+  <span class="hljs-attr">_resultType</span>?: <span class="hljs-title class_">TResult</span>; <span class="hljs-comment">// phantom type information</span>
+}
+</code></pre>
+<p>Use <code>onSql</code> for logging, testing, or debugging without changing execution flow.</p>
+<hr>
+<h2 id="2-type-safe-contexts" tabindex="-1"><a class="anchor" href="#2-type-safe-contexts" aria-hidden="true">#</a> 2. Type-Safe Contexts</h2>
+<h3 id="21-createschema" tabindex="-1"><a class="anchor" href="#21-createschema" aria-hidden="true">#</a> 2.1 createSchema</h3>
+<p>Creates a phantom-typed <code>DatabaseSchema</code> that ties table names to row types. The schema is passed to execution functions, which provide a type-safe query builder through the lambda’s first parameter.</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span> };
+  <span class="hljs-attr">posts</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">userId</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">title</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Schema is passed to execute functions, which provide the query builder &#x27;q&#x27; parameter</span>
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(db, schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>)),
+);
+</code></pre>
+<hr>
+<h2 id="3-helper-utilities" tabindex="-1"><a class="anchor" href="#3-helper-utilities" aria-hidden="true">#</a> 3. Helper Utilities</h2>
+<h3 id="31-createqueryhelpers" tabindex="-1"><a class="anchor" href="#31-createqueryhelpers" aria-hidden="true">#</a> 3.1 createQueryHelpers</h3>
+<p>Provides helper functions for case-insensitive comparisons and string searches. Helpers are automatically passed as the third parameter to query builder functions.</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, createQueryHelpers } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">selectStatement</span>(
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> helpers.<span class="hljs-property">functions</span>.<span class="hljs-title function_">icontains</span>(u.<span class="hljs-property">name</span>, <span class="hljs-string">&quot;alice&quot;</span>)),
+  {},
+);
+</code></pre>
+<p><strong>Available Helper Functions</strong></p>
+<p>Helpers expose the following functions that adapt per database dialect:</p>
+<ul>
+<li><code>ilike(field, pattern)</code> - Case-insensitive LIKE comparison</li>
+<li><code>contains(field, substring)</code> - Check if field contains substring (case-sensitive)</li>
+<li><code>icontains(field, substring)</code> - Check if field contains substring (case-insensitive)</li>
+<li><code>startsWith(field, prefix)</code> - Check if field starts with prefix (case-sensitive)</li>
+<li><code>istartsWith(field, prefix)</code> - Check if field starts with prefix (case-insensitive)</li>
+<li><code>endsWith(field, suffix)</code> - Check if field ends with suffix (case-sensitive)</li>
+<li><code>iendsWith(field, suffix)</code> - Check if field ends with suffix (case-insensitive)</li>
+</ul>
+<p><strong>Creating Custom Helpers</strong></p>
+<p>You can create helpers with custom functions:</p>
+<pre class="hljs"><code><span class="hljs-keyword">const</span> helpers = createQueryHelpers&lt;<span class="hljs-title class_">Schema</span>&gt;();
+<span class="hljs-comment">// Use helpers in your queries through the third parameter</span>
+</code></pre>
+
+      </article>
+
+      <nav class="toc">
+<h2>On This Page</h2>
+<ul>
+  <li><a href="#table-of-contents">Table of Contents</a></li>
+  <li><a href="#1-execution-apis">1. Execution APIs</a></li>
+  <li class="toc-sub"><a href="#11-selectstatement">1.1 selectStatement</a></li>
+  <li class="toc-sub"><a href="#12-executeselect">1.2 executeSelect</a></li>
+  <li class="toc-sub"><a href="#13-executeselectsimple">1.3 executeSelectSimple</a></li>
+  <li class="toc-sub"><a href="#14-insertstatement-%26-executeinsert">1.4 insertStatement & executeInsert</a></li>
+  <li class="toc-sub"><a href="#15-updatestatement-%26-executeupdate">1.5 updateStatement & executeUpdate</a></li>
+  <li class="toc-sub"><a href="#16-deletestatement-%26-executedelete">1.6 deleteStatement & executeDelete</a></li>
+  <li class="toc-sub"><a href="#17-statement-functions-(selectstatement%2C-insertstatement%2C-etc)">1.7 Statement Functions (selectStatement, insertStatement, etc.)</a></li>
+  <li class="toc-sub"><a href="#18-executeoptions-%26-sqlresult">1.8 ExecuteOptions & SqlResult</a></li>
+  <li><a href="#2-type-safe-contexts">2. Type-Safe Contexts</a></li>
+  <li class="toc-sub"><a href="#21-createschema">2.1 createSchema</a></li>
+  <li><a href="#3-helper-utilities">3. Helper Utilities</a></li>
+  <li class="toc-sub"><a href="#31-createqueryhelpers">3.1 createQueryHelpers</a></li>
+</ul>
+</nav>
+    </div>
+
+    <footer class="page-nav">
+  <a href="guide.html" class="prev">← Guide</a>
+  <a href="adapters.html" class="next">Adapters →</a>
+</footer>
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        hamburger.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', closeMenu);
+
+      // Close menu when clicking a nav link
+      const navLinks = sidebar.querySelectorAll('.nav-list a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

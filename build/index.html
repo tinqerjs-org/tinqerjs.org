@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tinqer - Type-safe LINQ-to-SQL query builder for TypeScript">
+  <title>Getting Started - Tinqer Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <a href="index.html" class="mobile-logo">
+      <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+      <span>Tinqer</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="overlay"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+        <span>Tinqer</span>
+      </a>
+      <p class="tagline">Type-safe LINQ-to-SQL for TypeScript</p>
+    </div>
+    <ul class="nav-list">
+  <li class="active"><a href="index.html">Getting Started</a></li>
+  <li><a href="guide.html">Guide</a></li>
+  <li><a href="api-reference.html">API Reference</a></li>
+  <li><a href="adapters.html">Adapters</a></li>
+  <li><a href="development.html">Development</a></li>
+  <li><a href="architecture.html">Architecture</a></li>
+</ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="breadcrumb"><span>Home</span></div>
+
+    <div class="content-wrapper">
+      <article class="markdown-body">
+        <h1 id="tinqer" tabindex="-1"><a class="anchor" href="#tinqer" aria-hidden="true">#</a> Tinqer</h1>
+<p>Runtime LINQ-to-SQL query builder for TypeScript. Queries are expressed as inline arrow functions, parsed into an expression tree, and compiled into SQL for PostgreSQL or SQLite.</p>
+<h2 id="installation" tabindex="-1"><a class="anchor" href="#installation" aria-hidden="true">#</a> Installation</h2>
+<p>Install the adapter for your database:</p>
+<pre class="hljs"><code><span class="hljs-comment"># PostgreSQL (pg-promise)</span>
+npm install @webpods/tinqer-sql-pg-promise
+
+<span class="hljs-comment"># SQLite (better-sqlite3)</span>
+npm install @webpods/tinqer-sql-better-sqlite3
+</code></pre>
+<h2 id="quick-start" tabindex="-1"><a class="anchor" href="#quick-start" aria-hidden="true">#</a> Quick Start</h2>
+<h3 id="postgresql-example" tabindex="-1"><a class="anchor" href="#postgresql-example" aria-hidden="true">#</a> PostgreSQL Example</h3>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelectSimple } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: {
+    <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+    <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+    <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>;
+    <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>;
+  };
+}
+
+<span class="hljs-keyword">const</span> pgp = <span class="hljs-title function_">pgPromise</span>();
+<span class="hljs-keyword">const</span> db = <span class="hljs-title function_">pgp</span>(<span class="hljs-string">&quot;postgresql://user:pass@localhost:5432/mydb&quot;</span>);
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelectSimple</span>(db, schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+    .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>)
+    .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+);
+<span class="hljs-comment">// results: [{ id: 1, name: &quot;Alice&quot; }, { id: 2, name: &quot;Bob&quot; }]</span>
+</code></pre>
+<h3 id="sqlite-example" tabindex="-1"><a class="anchor" href="#sqlite-example" aria-hidden="true">#</a> SQLite Example</h3>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect, selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">products</span>: {
+    <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>;
+    <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+    <span class="hljs-attr">price</span>: <span class="hljs-built_in">number</span>;
+    <span class="hljs-attr">inStock</span>: <span class="hljs-built_in">number</span>; <span class="hljs-comment">// SQLite uses INTEGER (0/1) for boolean values</span>
+  };
+}
+
+<span class="hljs-keyword">const</span> db = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Database</span>(<span class="hljs-string">&quot;./data.db&quot;</span>);
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">executeSelect</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;products&quot;</span>)
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> p.<span class="hljs-property">inStock</span> === <span class="hljs-number">1</span> &amp;&amp; p.<span class="hljs-property">price</span> &lt; params.<span class="hljs-property">maxPrice</span>)
+      .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> p.<span class="hljs-property">price</span>),
+  { <span class="hljs-attr">maxPrice</span>: <span class="hljs-number">100</span> },
+);
+
+<span class="hljs-comment">// Need the raw SQL for logging or prepared statements? selectStatement is still available:</span>
+<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">selectStatement</span>(
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;products&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> p.<span class="hljs-property">name</span>),
+  {},
+);
+</code></pre>
+<h2 id="core-features" tabindex="-1"><a class="anchor" href="#core-features" aria-hidden="true">#</a> Core Features</h2>
+<h3 id="type-safe-query-building" tabindex="-1"><a class="anchor" href="#type-safe-query-building" aria-hidden="true">#</a> Type-Safe Query Building</h3>
+<pre class="hljs"><code><span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Full TypeScript type inference</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q</span>) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+    .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span> &amp;&amp; u.<span class="hljs-property">email</span>.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&quot;@company.com&quot;</span>))
+    .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span>, <span class="hljs-attr">email</span>: u.<span class="hljs-property">email</span> }));
+
+<span class="hljs-comment">// The query builder returns a Queryable whose result type is inferred as</span>
+<span class="hljs-comment">// { id: number; name: string; email: string }</span>
+</code></pre>
+<h3 id="joins" tabindex="-1"><a class="anchor" href="#joins" aria-hidden="true">#</a> Joins</h3>
+<p>Tinqer mirrors LINQ semantics. Inner joins have a dedicated operator; left outer and cross joins follow the familiar <code>groupJoin</code>/<code>selectMany</code> patterns from C#.</p>
+<h4 id="inner-join" tabindex="-1"><a class="anchor" href="#inner-join" aria-hidden="true">#</a> Inner Join</h4>
+<pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
+  <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">deptId</span>: <span class="hljs-built_in">number</span> };
+  <span class="hljs-attr">departments</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
+}
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q</span>) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+    .<span class="hljs-title function_">join</span>(
+      q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
+      <span class="hljs-function">(<span class="hljs-params">user</span>) =&gt;</span> user.<span class="hljs-property">deptId</span>,
+      <span class="hljs-function">(<span class="hljs-params">department</span>) =&gt;</span> department.<span class="hljs-property">id</span>,
+      <span class="hljs-function">(<span class="hljs-params">user, department</span>) =&gt;</span> ({
+        <span class="hljs-attr">userName</span>: user.<span class="hljs-property">name</span>,
+        <span class="hljs-attr">departmentName</span>: department.<span class="hljs-property">name</span>,
+      }),
+    )
+    .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> row.<span class="hljs-property">userName</span>);
+</code></pre>
+<h4 id="left-outer-join" tabindex="-1"><a class="anchor" href="#left-outer-join" aria-hidden="true">#</a> Left Outer Join</h4>
+<pre class="hljs"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q</span>) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+    .<span class="hljs-title function_">groupJoin</span>(
+      q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
+      <span class="hljs-function">(<span class="hljs-params">user</span>) =&gt;</span> user.<span class="hljs-property">deptId</span>,
+      <span class="hljs-function">(<span class="hljs-params">department</span>) =&gt;</span> department.<span class="hljs-property">id</span>,
+      <span class="hljs-function">(<span class="hljs-params">user, deptGroup</span>) =&gt;</span> ({ user, deptGroup }),
+    )
+    .<span class="hljs-title function_">selectMany</span>(
+      <span class="hljs-function">(<span class="hljs-params">group</span>) =&gt;</span> group.<span class="hljs-property">deptGroup</span>.<span class="hljs-title function_">defaultIfEmpty</span>(),
+      <span class="hljs-function">(<span class="hljs-params">group, department</span>) =&gt;</span> ({
+        <span class="hljs-attr">user</span>: group.<span class="hljs-property">user</span>,
+        department,
+      }),
+    )
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> ({
+      <span class="hljs-attr">userId</span>: row.<span class="hljs-property">user</span>.<span class="hljs-property">id</span>,
+      <span class="hljs-attr">departmentName</span>: row.<span class="hljs-property">department</span> ? row.<span class="hljs-property">department</span>.<span class="hljs-property">name</span> : <span class="hljs-literal">null</span>,
+    }));
+</code></pre>
+<h4 id="cross-join" tabindex="-1"><a class="anchor" href="#cross-join" aria-hidden="true">#</a> Cross Join</h4>
+<pre class="hljs"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q</span>) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>)
+    .<span class="hljs-title function_">selectMany</span>(
+      <span class="hljs-function">() =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>),
+      <span class="hljs-function">(<span class="hljs-params">department, user</span>) =&gt;</span> ({ department, user }),
+    )
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> ({
+      <span class="hljs-attr">departmentId</span>: row.<span class="hljs-property">department</span>.<span class="hljs-property">id</span>,
+      <span class="hljs-attr">userId</span>: row.<span class="hljs-property">user</span>.<span class="hljs-property">id</span>,
+    }));
+</code></pre>
+<p>Right and full outer joins still require manual SQL, just as in LINQ-to-Objects.</p>
+<h3 id="grouping-and-aggregation" tabindex="-1"><a class="anchor" href="#grouping-and-aggregation" aria-hidden="true">#</a> Grouping and Aggregation</h3>
+<pre class="hljs"><code><span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q</span>) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>)
+    .<span class="hljs-title function_">groupBy</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">product_id</span>)
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">g</span>) =&gt;</span> ({
+      <span class="hljs-attr">productId</span>: g.<span class="hljs-property">key</span>,
+      <span class="hljs-attr">totalQuantity</span>: g.<span class="hljs-title function_">sum</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">quantity</span>),
+      <span class="hljs-attr">avgPrice</span>: g.<span class="hljs-title function_">avg</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">price</span>),
+      <span class="hljs-attr">orderCount</span>: g.<span class="hljs-title function_">count</span>(),
+    }))
+    .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> row.<span class="hljs-property">totalQuantity</span>);
+</code></pre>
+<h3 id="window-functions" tabindex="-1"><a class="anchor" href="#window-functions" aria-hidden="true">#</a> Window Functions</h3>
+<p>Window functions enable calculations across rows related to the current row. Tinqer supports <code>ROW_NUMBER()</code>, <code>RANK()</code>, and <code>DENSE_RANK()</code> with optional partitioning and ordering.</p>
+<pre class="hljs"><code><span class="hljs-comment">// Get top earner per department (automatically wrapped in subquery)</span>
+<span class="hljs-keyword">const</span> topEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, h</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
+      .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
+        ...e,
+        <span class="hljs-attr">rank</span>: h
+          .<span class="hljs-title function_">window</span>(e)
+          .<span class="hljs-title function_">partitionBy</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">department</span>)
+          .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">salary</span>)
+          .<span class="hljs-title function_">rowNumber</span>(),
+      }))
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
+);
+
+<span class="hljs-comment">// Generated SQL (automatically wrapped):</span>
+<span class="hljs-comment">// SELECT * FROM (</span>
+<span class="hljs-comment">//   SELECT *, ROW_NUMBER() OVER (PARTITION BY &quot;department&quot; ORDER BY &quot;salary&quot; DESC) AS &quot;rank&quot;</span>
+<span class="hljs-comment">//   FROM &quot;employees&quot;</span>
+<span class="hljs-comment">// ) AS &quot;employees&quot;</span>
+<span class="hljs-comment">// WHERE &quot;rank&quot; = 1</span>
+</code></pre>
+<p><strong>Automatic Subquery Wrapping</strong>: Tinqer automatically detects when <code>where()</code> clauses reference window function columns and wraps the query in a subquery, since SQL doesn’t allow filtering on window functions at the same level where they’re defined.</p>
+<p>See the <a href="docs/guide.md#8-window-functions">Window Functions Guide</a> for detailed examples of <code>RANK()</code>, <code>DENSE_RANK()</code>, complex ordering, and <a href="docs/guide.md#85-filtering-on-window-function-results">filtering on window results</a>.</p>
+<h3 id="crud-operations" tabindex="-1"><a class="anchor" href="#crud-operations" aria-hidden="true">#</a> CRUD Operations</h3>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// INSERT</span>
+<span class="hljs-keyword">const</span> insertedRows = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
+      <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>,
+      <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span>,
+    }),
+  {},
+);
+
+<span class="hljs-comment">// UPDATE with RETURNING</span>
+<span class="hljs-keyword">const</span> inactiveUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; params.<span class="hljs-property">cutoffDate</span>)
+      .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>),
+  { <span class="hljs-attr">cutoffDate</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2023-01-01&quot;</span>) },
+);
+
+<span class="hljs-comment">// DELETE</span>
+<span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
+  db,
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;deleted&quot;</span>),
+  {},
+);
+
+<span class="hljs-comment">// SQLite note: executeInsert/executeUpdate ignore RETURNING clauses at runtime; run a follow-up SELECT if you need the affected rows.</span>
+</code></pre>
+<h3 id="parameters-and-auto-parameterisation" tabindex="-1"><a class="anchor" href="#parameters-and-auto-parameterisation" aria-hidden="true">#</a> Parameters and Auto-Parameterisation</h3>
+<p>All literal values are automatically parameterized to prevent SQL injection:</p>
+<pre class="hljs"><code><span class="hljs-comment">// External parameters via params object</span>
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> sample = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span>), {
+  <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span>,
+});
+<span class="hljs-comment">// SQL (PostgreSQL): SELECT * FROM &quot;users&quot; WHERE &quot;age&quot; &gt;= $(minAge)</span>
+<span class="hljs-comment">// params: { minAge: 18 }</span>
+
+<span class="hljs-comment">// Literals auto-parameterized automatically</span>
+<span class="hljs-keyword">const</span> literals = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
+<span class="hljs-comment">// params: { __p1: 18 }</span>
+</code></pre>
+<h3 id="case-insensitive-string-operations" tabindex="-1"><a class="anchor" href="#case-insensitive-string-operations" aria-hidden="true">#</a> Case-Insensitive String Operations</h3>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">query</span> = (<span class="hljs-params">q, params, helpers</span>) =&gt;
+  q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> helpers.<span class="hljs-title function_">contains</span>(u.<span class="hljs-property">name</span>, <span class="hljs-string">&quot;alice&quot;</span>)); <span class="hljs-comment">// Case-insensitive substring match</span>
+
+<span class="hljs-comment">// PostgreSQL: WHERE u.name ILIKE $1 (param: &quot;%alice%&quot;)</span>
+<span class="hljs-comment">// SQLite: WHERE LOWER(u.name) LIKE LOWER(?) (param: &quot;%alice%&quot;)</span>
+</code></pre>
+<h2 id="key-concepts" tabindex="-1"><a class="anchor" href="#key-concepts" aria-hidden="true">#</a> Key Concepts</h2>
+<h3 id="query-lifecycle" tabindex="-1"><a class="anchor" href="#query-lifecycle" aria-hidden="true">#</a> Query Lifecycle</h3>
+<ol>
+<li><strong>Build Query</strong> - Construct fluent chain using <code>Queryable</code> API</li>
+<li><strong>Parse Lambda</strong> - Lambda expressions are parsed into expression tree (never executed)</li>
+<li><strong>Auto-Parameterize</strong> - Literal values extracted as parameters</li>
+<li><strong>Generate SQL</strong> - Adapter converts expression tree to database-specific SQL</li>
+</ol>
+<h3 id="expression-support" tabindex="-1"><a class="anchor" href="#expression-support" aria-hidden="true">#</a> Expression Support</h3>
+<p>Tinqer supports a focused set of JavaScript/TypeScript expressions:</p>
+<ul>
+<li><strong>Comparison</strong>: <code>===</code>, <code>!==</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></li>
+<li><strong>Logical</strong>: <code>&amp;&amp;</code>, <code>||</code>, <code>!</code></li>
+<li><strong>Arithmetic</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></li>
+<li><strong>String</strong>: <code>.includes()</code>, <code>.startsWith()</code>, <code>.endsWith()</code>, <code>.toLowerCase()</code>, <code>.toUpperCase()</code></li>
+<li><strong>Null handling</strong>: <code>??</code> (null coalescing), <code>?.</code> (optional chaining)</li>
+<li><strong>Arrays</strong>: <code>.includes()</code> for IN queries</li>
+<li><strong>Helper functions</strong>: <code>ilike()</code>, <code>contains()</code>, <code>startsWith()</code>, <code>endsWith()</code> (case-insensitive)</li>
+<li><strong>Window functions</strong>: <code>h.window(row).rowNumber()</code>, <code>h.window(row).rank()</code>, <code>h.window(row).denseRank()</code> with <code>partitionBy()</code>, <code>orderBy()</code>, <code>orderByDescending()</code>, <code>thenBy()</code>, <code>thenByDescending()</code></li>
+</ul>
+<h2 id="database-support" tabindex="-1"><a class="anchor" href="#database-support" aria-hidden="true">#</a> Database Support</h2>
+<h3 id="postgresql" tabindex="-1"><a class="anchor" href="#postgresql" aria-hidden="true">#</a> PostgreSQL</h3>
+<ul>
+<li>Native boolean type (<code>true</code>/<code>false</code>)</li>
+<li>Case-insensitive matching with <code>ILIKE</code></li>
+<li>Full JSONB support</li>
+<li>Window functions: <code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code></li>
+<li>Parameter placeholders: <code>$1</code>, <code>$2</code>, etc.</li>
+</ul>
+<h3 id="sqlite" tabindex="-1"><a class="anchor" href="#sqlite" aria-hidden="true">#</a> SQLite</h3>
+<ul>
+<li>Boolean values use INTEGER (0/1)</li>
+<li>Case-insensitive via <code>LOWER()</code> function</li>
+<li>JSON functions support</li>
+<li>Window functions: <code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code> (requires SQLite 3.25+)</li>
+<li>Parameter placeholders: <code>?</code>, <code>?</code>, etc.</li>
+</ul>
+<p>See <a href="docs/adapters.md">Database Adapters</a> for detailed comparison.</p>
+<h2 id="differences-from-net-linq-to-sql" tabindex="-1"><a class="anchor" href="#differences-from-net-linq-to-sql" aria-hidden="true">#</a> Differences from .NET LINQ to SQL</h2>
+<ul>
+<li>Lambdas cannot capture external variables; use params object</li>
+<li>Limited method set (no <code>SelectMany</code>, <code>GroupJoin</code>, <code>DefaultIfEmpty</code>)</li>
+<li>Left outer joins and cross joins supported via LINQ patterns (right/full joins still require manual SQL)</li>
+<li>No deferred execution; SQL generated on demand</li>
+<li>Grouping supports <code>count</code>, <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code></li>
+</ul>
+<h2 id="documentation" tabindex="-1"><a class="anchor" href="#documentation" aria-hidden="true">#</a> Documentation</h2>
+<ul>
+<li><strong><a href="docs/guide.md">Query Operations Guide</a></strong> - Complete reference for all query operations, parameters, and CRUD</li>
+<li><strong><a href="docs/api-reference.md">API Reference</a></strong> - Execution functions, type utilities, and helper APIs</li>
+<li><strong><a href="docs/adapters.md">Database Adapters</a></strong> - PostgreSQL and SQLite specifics, differences, limitations</li>
+<li><strong><a href="docs/development.md">Development Guide</a></strong> - Contributing, testing, troubleshooting</li>
+</ul>
+<h2 id="packages" tabindex="-1"><a class="anchor" href="#packages" aria-hidden="true">#</a> Packages</h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@webpods/tinqer</code></td>
+<td>Core expression tree and types (re-exported by adapters)</td>
+</tr>
+<tr>
+<td><code>@webpods/tinqer-sql-pg-promise</code></td>
+<td>PostgreSQL adapter with pg-promise</td>
+</tr>
+<tr>
+<td><code>@webpods/tinqer-sql-better-sqlite3</code></td>
+<td>SQLite adapter with better-sqlite3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="license" tabindex="-1"><a class="anchor" href="#license" aria-hidden="true">#</a> License</h2>
+<p>MIT</p>
+
+      </article>
+
+      <nav class="toc">
+<h2>On This Page</h2>
+<ul>
+  <li><a href="#installation">Installation</a></li>
+  <li><a href="#quick-start">Quick Start</a></li>
+  <li class="toc-sub"><a href="#postgresql-example">PostgreSQL Example</a></li>
+  <li class="toc-sub"><a href="#sqlite-example">SQLite Example</a></li>
+  <li><a href="#core-features">Core Features</a></li>
+  <li class="toc-sub"><a href="#type-safe-query-building">Type-Safe Query Building</a></li>
+  <li class="toc-sub"><a href="#joins">Joins</a></li>
+  <li class="toc-sub"><a href="#grouping-and-aggregation">Grouping and Aggregation</a></li>
+  <li class="toc-sub"><a href="#window-functions">Window Functions</a></li>
+  <li class="toc-sub"><a href="#crud-operations">CRUD Operations</a></li>
+  <li class="toc-sub"><a href="#parameters-and-auto-parameterisation">Parameters and Auto-Parameterisation</a></li>
+  <li class="toc-sub"><a href="#case-insensitive-string-operations">Case-Insensitive String Operations</a></li>
+  <li><a href="#key-concepts">Key Concepts</a></li>
+  <li class="toc-sub"><a href="#query-lifecycle">Query Lifecycle</a></li>
+  <li class="toc-sub"><a href="#expression-support">Expression Support</a></li>
+  <li><a href="#database-support">Database Support</a></li>
+  <li class="toc-sub"><a href="#postgresql">PostgreSQL</a></li>
+  <li class="toc-sub"><a href="#sqlite">SQLite</a></li>
+  <li><a href="#differences-from-net-linq-to-sql">Differences from .NET LINQ to SQL</a></li>
+  <li><a href="#documentation">Documentation</a></li>
+  <li><a href="#packages">Packages</a></li>
+  <li><a href="#license">License</a></li>
+</ul>
+</nav>
+    </div>
+
+    <footer class="page-nav">
+  <span></span>
+  <a href="guide.html" class="next">Guide →</a>
+</footer>
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        hamburger.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', closeMenu);
+
+      // Close menu when clicking a nav link
+      const navLinks = sidebar.querySelectorAll('.nav-list a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tinqer - Type-safe LINQ-to-SQL query builder for TypeScript">
+  <title>Architecture - Tinqer Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <a href="index.html" class="mobile-logo">
+      <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+      <span>Tinqer</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" id="overlay"></div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <img src="logo.svg" alt="Tinqer" class="logo-icon" />
+        <span>Tinqer</span>
+      </a>
+      <p class="tagline">Type-safe LINQ-to-SQL for TypeScript</p>
+    </div>
+    <ul class="nav-list">
+  <li><a href="index.html">Getting Started</a></li>
+  <li><a href="guide.html">Guide</a></li>
+  <li><a href="api-reference.html">API Reference</a></li>
+  <li><a href="adapters.html">Adapters</a></li>
+  <li><a href="development.html">Development</a></li>
+  <li class="active"><a href="architecture.html">Architecture</a></li>
+</ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+    <div class="breadcrumb"><a href="index.html">Home</a> / <span>Architecture</span></div>
+
+    <div class="content-wrapper">
+      <article class="markdown-body">
+        <h1 id="architecture" tabindex="-1"><a class="anchor" href="#architecture" aria-hidden="true">#</a> Architecture</h1>
+<p>Tinqer is a LINQ-to-SQL query builder for TypeScript that converts lambda expressions into SQL queries through runtime parsing and expression tree generation.</p>
+<h2 id="database-adapters" tabindex="-1"><a class="anchor" href="#database-adapters" aria-hidden="true">#</a> Database Adapters</h2>
+<p>The core package is adapter-agnostic; database-specific behavior lives in companion adapters. The repository currently ships two adapters:</p>
+<ul>
+<li><code>@webpods/tinqer-sql-pg-promise</code> – PostgreSQL integration built on pg-promise</li>
+<li><code>@webpods/tinqer-sql-better-sqlite3</code> – SQLite integration powered by better-sqlite3</li>
+</ul>
+<p>Both adapters provide database context objects that expose a <code>dsl</code> property containing query builders (<code>from</code>, <code>query</code>, etc.). Applications receive the DSL through lambda parameters, allowing database switching without rewriting query code.</p>
+<h2 id="core-design-principles" tabindex="-1"><a class="anchor" href="#core-design-principles" aria-hidden="true">#</a> Core Design Principles</h2>
+<h3 id="dual-type-system" tabindex="-1"><a class="anchor" href="#dual-type-system" aria-hidden="true">#</a> Dual Type System</h3>
+<p>Tinqer employs a dual type system to provide both compile-time type safety and runtime SQL generation:</p>
+<ol>
+<li><strong>Compile-time Layer</strong>: TypeScript classes (<code>Queryable&lt;T&gt;</code>, <code>TerminalQuery&lt;T&gt;</code>) provide type-safe APIs for users</li>
+<li><strong>Runtime Layer</strong>: Simplified expression trees without generics for parsing and SQL generation</li>
+</ol>
+<p>This separation allows users to write fully type-safe queries while the parser works with simplified data structures.</p>
+<h3 id="expression-trees" tabindex="-1"><a class="anchor" href="#expression-trees" aria-hidden="true">#</a> Expression Trees</h3>
+<p>Tinqer uses expression trees to represent queries, matching the design of .NET LINQ. Each query operation wraps its source operation, creating a nested tree structure that preserves the complete operation chain.</p>
+<h3 id="runtime-lambda-parsing" tabindex="-1"><a class="anchor" href="#runtime-lambda-parsing" aria-hidden="true">#</a> Runtime Lambda Parsing</h3>
+<p>TypeScript lambdas are parsed at runtime using the OXC parser. The function string representation is converted to AST, then to our expression tree format.</p>
+<h2 id="expression-type-system" tabindex="-1"><a class="anchor" href="#expression-type-system" aria-hidden="true">#</a> Expression Type System</h2>
+<h3 id="expression-type-hierarchy" tabindex="-1"><a class="anchor" href="#expression-type-hierarchy" aria-hidden="true">#</a> Expression Type Hierarchy</h3>
+<p>Expressions are precisely typed based on their evaluation result:</p>
+<pre class="hljs"><code><span class="hljs-comment">// Base type - all possible expressions</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">Expression</span> = <span class="hljs-title class_">BooleanExpression</span> | <span class="hljs-title class_">ValueExpression</span> | <span class="hljs-title class_">ObjectExpression</span> | <span class="hljs-title class_">ArrayExpression</span>;
+
+<span class="hljs-comment">// Boolean expressions - evaluate to true/false</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">BooleanExpression</span> =
+  | <span class="hljs-title class_">ComparisonExpression</span> <span class="hljs-comment">// x.age &gt;= 18</span>
+  | <span class="hljs-title class_">LogicalExpression</span> <span class="hljs-comment">// x.age &gt;= 18 &amp;&amp; x.isActive</span>
+  | <span class="hljs-title class_">BooleanMemberExpression</span> <span class="hljs-comment">// x.isActive</span>
+  | <span class="hljs-title class_">BooleanMethodExpression</span> <span class="hljs-comment">// x.name.startsWith(&quot;J&quot;)</span>
+  | <span class="hljs-title class_">NotExpression</span> <span class="hljs-comment">// !x.isDeleted</span>
+  | <span class="hljs-title class_">BooleanConstantExpression</span>; <span class="hljs-comment">// true or false</span>
+
+<span class="hljs-comment">// Value expressions - evaluate to a value</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">ValueExpression</span> =
+  | <span class="hljs-title class_">ColumnExpression</span> <span class="hljs-comment">// x.name</span>
+  | <span class="hljs-title class_">ConstantExpression</span> <span class="hljs-comment">// 42, &quot;hello&quot;</span>
+  | <span class="hljs-title class_">ParameterExpression</span> <span class="hljs-comment">// p.minAge</span>
+  | <span class="hljs-title class_">ArithmeticExpression</span> <span class="hljs-comment">// x.age + 1</span>
+  | <span class="hljs-title class_">StringMethodExpression</span> <span class="hljs-comment">// x.name.toLowerCase()</span>
+  | <span class="hljs-title class_">CaseExpression</span>; <span class="hljs-comment">// CASE WHEN ... THEN ...</span>
+</code></pre>
+<h3 id="detailed-expression-types" tabindex="-1"><a class="anchor" href="#detailed-expression-types" aria-hidden="true">#</a> Detailed Expression Types</h3>
+<h4 id="comparisonexpression" tabindex="-1"><a class="anchor" href="#comparisonexpression" aria-hidden="true">#</a> ComparisonExpression</h4>
+<p>Represents binary comparisons that produce boolean results.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ComparisonExpression</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>;
+  <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;==&quot;</span> | <span class="hljs-string">&quot;!=&quot;</span> | <span class="hljs-string">&quot;&gt;&quot;</span> | <span class="hljs-string">&quot;&gt;=&quot;</span> | <span class="hljs-string">&quot;&lt;&quot;</span> | <span class="hljs-string">&quot;&lt;=&quot;</span>;
+  <span class="hljs-attr">left</span>: <span class="hljs-title class_">ValueExpression</span>;
+  <span class="hljs-attr">right</span>: <span class="hljs-title class_">ValueExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>x =&gt; x.age &gt;= 18</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>,
+  <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&gt;=&quot;</span>,
+  <span class="hljs-attr">left</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;age&quot;</span> },
+  <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;constant&quot;</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">18</span> }
+}
+</code></pre>
+<h4 id="logicalexpression" tabindex="-1"><a class="anchor" href="#logicalexpression" aria-hidden="true">#</a> LogicalExpression</h4>
+<p>Combines boolean expressions with logical operators.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">LogicalExpression</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;logical&quot;</span>;
+  <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&amp;&amp;&quot;</span> | <span class="hljs-string">&quot;||&quot;</span>;
+  <span class="hljs-attr">left</span>: <span class="hljs-title class_">BooleanExpression</span>;
+  <span class="hljs-attr">right</span>: <span class="hljs-title class_">BooleanExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>x =&gt; x.age &gt;= 18 &amp;&amp; x.isActive</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;logical&quot;</span>,
+  <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&amp;&amp;&quot;</span>,
+  <span class="hljs-attr">left</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>,
+    <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&gt;=&quot;</span>,
+    <span class="hljs-attr">left</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;age&quot;</span> },
+    <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;constant&quot;</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">18</span> }
+  },
+  <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;isActive&quot;</span> }
+}
+</code></pre>
+<h4 id="columnexpression" tabindex="-1"><a class="anchor" href="#columnexpression" aria-hidden="true">#</a> ColumnExpression</h4>
+<p>References a table column.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ColumnExpression</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>;
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">table</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Optional table alias for joins</span>
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>x =&gt; x.name</code>
+<strong>Example Output</strong>: <code>{ type: &quot;column&quot;, name: &quot;name&quot; }</code></p>
+<h4 id="parameterexpression" tabindex="-1"><a class="anchor" href="#parameterexpression" aria-hidden="true">#</a> ParameterExpression</h4>
+<p>References an external parameter passed to the query.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ParameterExpression</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;param&quot;</span>;
+  <span class="hljs-attr">param</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Parameter name (e.g., &quot;p&quot;)</span>
+  <span class="hljs-attr">property</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Property path (e.g., &quot;minAge&quot;)</span>
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>p =&gt; p.minAge</code>
+<strong>Example Output</strong>: <code>{ type: &quot;param&quot;, param: &quot;p&quot;, property: &quot;minAge&quot; }</code></p>
+<h4 id="objectexpression" tabindex="-1"><a class="anchor" href="#objectexpression" aria-hidden="true">#</a> ObjectExpression</h4>
+<p>Represents object literals, typically used in SELECT projections.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ObjectExpression</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>;
+  <span class="hljs-attr">properties</span>: <span class="hljs-title class_">Array</span>&lt;{
+    <span class="hljs-attr">key</span>: <span class="hljs-built_in">string</span>;
+    <span class="hljs-attr">value</span>: <span class="hljs-title class_">ValueExpression</span> | <span class="hljs-title class_">BooleanExpression</span>;
+  }&gt;;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>x =&gt; ({ id: x.id, name: x.name })</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>,
+  <span class="hljs-attr">properties</span>: [
+    { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;id&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;id&quot;</span> } },
+    { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span> } }
+  ]
+}
+</code></pre>
+<h2 id="query-operations" tabindex="-1"><a class="anchor" href="#query-operations" aria-hidden="true">#</a> Query Operations</h2>
+<h3 id="simplified-operation-structure" tabindex="-1"><a class="anchor" href="#simplified-operation-structure" aria-hidden="true">#</a> Simplified Operation Structure</h3>
+<p>Query operations no longer use complex generics. Each operation has a precise structure with specific expression types.</p>
+<h3 id="base-queryoperation" tabindex="-1"><a class="anchor" href="#base-queryoperation" aria-hidden="true">#</a> Base QueryOperation</h3>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;queryOperation&quot;</span>;
+  <span class="hljs-attr">operationType</span>: <span class="hljs-built_in">string</span>;
+}
+</code></pre>
+<h3 id="chainable-operations" tabindex="-1"><a class="anchor" href="#chainable-operations" aria-hidden="true">#</a> Chainable Operations</h3>
+<h4 id="fromoperation" tabindex="-1"><a class="anchor" href="#fromoperation" aria-hidden="true">#</a> FromOperation</h4>
+<p>The root of all query chains.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">FromOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;from&quot;</span>;
+  <span class="hljs-attr">table</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">schema</span>?: <span class="hljs-built_in">string</span>;
+}
+</code></pre>
+<p><strong>User-Facing API</strong>: <code>(q, ) =&gt; q.from(&quot;users&quot;)</code></p>
+<p><strong>Internal Representation</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;queryOperation&quot;</span>,
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;from&quot;</span>,
+  <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;users&quot;</span>
+}
+</code></pre>
+<h4 id="whereoperation" tabindex="-1"><a class="anchor" href="#whereoperation" aria-hidden="true">#</a> WhereOperation</h4>
+<p>Filters rows based on a boolean predicate.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">WhereOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;where&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">predicate</span>: <span class="hljs-title class_">BooleanExpression</span>; <span class="hljs-comment">// Must be boolean</span>
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.where(x =&gt; x.age &gt;= 18 &amp;&amp; x.isActive)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;where&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">predicate</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;logical&quot;</span>,
+    <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&amp;&amp;&quot;</span>,
+    <span class="hljs-attr">left</span>: {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>,
+      <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&gt;=&quot;</span>,
+      <span class="hljs-attr">left</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;age&quot;</span> },
+      <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;constant&quot;</span>, <span class="hljs-attr">value</span>: <span class="hljs-number">18</span> }
+    },
+    <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;isActive&quot;</span> }
+  }
+}
+</code></pre>
+<h4 id="selectoperation" tabindex="-1"><a class="anchor" href="#selectoperation" aria-hidden="true">#</a> SelectOperation</h4>
+<p>Projects data into a new shape.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SelectOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;select&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">selector</span>: <span class="hljs-title class_">ValueExpression</span> | <span class="hljs-title class_">ObjectExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.select(x =&gt; ({ id: x.id, name: x.name }))</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;select&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">selector</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>,
+    <span class="hljs-attr">properties</span>: [
+      { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;id&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;id&quot;</span> } },
+      { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span> } }
+    ]
+  }
+}
+</code></pre>
+<h4 id="joinoperation" tabindex="-1"><a class="anchor" href="#joinoperation" aria-hidden="true">#</a> JoinOperation</h4>
+<p>Joins two tables on matching keys.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">JoinOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;join&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">inner</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">outerKey</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Simple column name</span>
+  <span class="hljs-attr">innerKey</span>: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// Simple column name</span>
+  <span class="hljs-attr">resultSelector</span>: <span class="hljs-title class_">ObjectExpression</span>;
+  <span class="hljs-attr">joinType</span>: <span class="hljs-string">&quot;inner&quot;</span> | <span class="hljs-string">&quot;left&quot;</span> | <span class="hljs-string">&quot;right&quot;</span> | <span class="hljs-string">&quot;full&quot;</span> | <span class="hljs-string">&quot;cross&quot;</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>:</p>
+<pre class="hljs"><code>users.<span class="hljs-title function_">join</span>(
+  departments,
+  <span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>,
+  <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">id</span>,
+  <span class="hljs-function">(<span class="hljs-params">u, d</span>) =&gt;</span> ({ <span class="hljs-attr">userName</span>: u.<span class="hljs-property">name</span>, <span class="hljs-attr">deptName</span>: d.<span class="hljs-property">name</span> }),
+);
+</code></pre>
+<p><strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;join&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* users table */</span> },
+  <span class="hljs-attr">inner</span>: { <span class="hljs-comment">/* departments table */</span> },
+  <span class="hljs-attr">outerKey</span>: <span class="hljs-string">&quot;departmentId&quot;</span>,
+  <span class="hljs-attr">innerKey</span>: <span class="hljs-string">&quot;id&quot;</span>,
+  <span class="hljs-attr">resultSelector</span>: {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>,
+    <span class="hljs-attr">properties</span>: [
+      { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;userName&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;t0&quot;</span> } },
+      { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;deptName&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;t1&quot;</span> } }
+    ]
+  },
+  <span class="hljs-attr">joinType</span>: <span class="hljs-string">&quot;inner&quot;</span>
+}
+</code></pre>
+<h4 id="orderbyoperation" tabindex="-1"><a class="anchor" href="#orderbyoperation" aria-hidden="true">#</a> OrderByOperation</h4>
+<p>Sorts results by a key.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">OrderByOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;orderBy&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">keySelector</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">ValueExpression</span>;
+  <span class="hljs-attr">direction</span>: <span class="hljs-string">&quot;ascending&quot;</span> | <span class="hljs-string">&quot;descending&quot;</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.orderBy(x =&gt; x.name)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;orderBy&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">keySelector</span>: <span class="hljs-string">&quot;name&quot;</span>,
+  <span class="hljs-attr">direction</span>: <span class="hljs-string">&quot;ascending&quot;</span>
+}
+</code></pre>
+<h4 id="groupbyoperation" tabindex="-1"><a class="anchor" href="#groupbyoperation" aria-hidden="true">#</a> GroupByOperation</h4>
+<p>Groups rows by a key.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">GroupByOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;groupBy&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">keySelector</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">ValueExpression</span>;
+  <span class="hljs-attr">elementSelector</span>?: <span class="hljs-title class_">ValueExpression</span> | <span class="hljs-title class_">ObjectExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.groupBy(x =&gt; x.departmentId)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;groupBy&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">keySelector</span>: <span class="hljs-string">&quot;departmentId&quot;</span>
+}
+</code></pre>
+<h4 id="takeoperation-%2F-skipoperation" tabindex="-1"><a class="anchor" href="#takeoperation-%2F-skipoperation" aria-hidden="true">#</a> TakeOperation / SkipOperation</h4>
+<p>Limits or skips rows.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TakeOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;take&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">count</span>: <span class="hljs-built_in">number</span> | <span class="hljs-title class_">ParamRef</span>;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SkipOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;skip&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">count</span>: <span class="hljs-built_in">number</span> | <span class="hljs-title class_">ParamRef</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.take(10).skip(p =&gt; p.offset)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;take&quot;</span>,
+  <span class="hljs-attr">source</span>: {
+    <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;skip&quot;</span>,
+    <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous */</span> },
+    <span class="hljs-attr">count</span>: { <span class="hljs-attr">param</span>: <span class="hljs-string">&quot;p&quot;</span>, <span class="hljs-attr">property</span>: <span class="hljs-string">&quot;offset&quot;</span> }
+  },
+  <span class="hljs-attr">count</span>: <span class="hljs-number">10</span>
+}
+</code></pre>
+<h3 id="terminal-operations" tabindex="-1"><a class="anchor" href="#terminal-operations" aria-hidden="true">#</a> Terminal Operations</h3>
+<p>Terminal operations end the query chain and produce a result.</p>
+<h4 id="countoperation" tabindex="-1"><a class="anchor" href="#countoperation" aria-hidden="true">#</a> CountOperation</h4>
+<p>Counts rows.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">CountOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;count&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">predicate</span>?: <span class="hljs-title class_">BooleanExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.count(x =&gt; x.isActive)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;count&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">predicate</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;isActive&quot;</span> }
+}
+</code></pre>
+<h4 id="firstoperation-%2F-singleoperation" tabindex="-1"><a class="anchor" href="#firstoperation-%2F-singleoperation" aria-hidden="true">#</a> FirstOperation / SingleOperation</h4>
+<p>Gets first or single row.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">FirstOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;first&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">predicate</span>?: <span class="hljs-title class_">BooleanExpression</span>;
+}
+</code></pre>
+<h4 id="aggregate-operations" tabindex="-1"><a class="anchor" href="#aggregate-operations" aria-hidden="true">#</a> Aggregate Operations</h4>
+<p>Sum, Average, Min, Max operations.</p>
+<pre class="hljs"><code><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SumOperation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;sum&quot;</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">QueryOperation</span>;
+  <span class="hljs-attr">selectorExpression</span>?: <span class="hljs-title class_">ValueExpression</span>;
+}
+</code></pre>
+<p><strong>Example Input</strong>: <code>.sum(x =&gt; x.amount)</code>
+<strong>Example Output</strong>:</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;sum&quot;</span>,
+  <span class="hljs-attr">source</span>: { <span class="hljs-comment">/* previous operation */</span> },
+  <span class="hljs-attr">selectorExpression</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;amount&quot;</span> }
+}
+</code></pre>
+<h2 id="query-processing-pipeline" tabindex="-1"><a class="anchor" href="#query-processing-pipeline" aria-hidden="true">#</a> Query Processing Pipeline</h2>
+<p>The query execution flow follows a multi-stage pipeline that transforms user code into SQL:</p>
+<pre class="hljs"><code>User Code → Parser → Normalization Passes → SQL Generator → SQL
+</code></pre>
+<h3 id="stage-1%3A-parsing-(runtime-lambda-parsing)" tabindex="-1"><a class="anchor" href="#stage-1%3A-parsing-(runtime-lambda-parsing)" aria-hidden="true">#</a> Stage 1: Parsing (Runtime Lambda Parsing)</h3>
+<p>The parser uses OXC to convert lambda expressions into an Abstract Syntax Tree (AST), then transforms it into Tinqer’s operation tree.</p>
+<p><strong>Input</strong>: Lambda expression with DSL parameter pattern</p>
+<pre class="hljs"><code>(q) =&gt;
+  q
+    .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
+    .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({ ...e, <span class="hljs-attr">rn</span>: <span class="hljs-variable language_">window</span>.<span class="hljs-title function_">rowNumber</span>() }))
+    .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">rn</span> === <span class="hljs-number">1</span>);
+</code></pre>
+<p><strong>Output</strong>: Operation tree</p>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;where&quot;</span>,
+  <span class="hljs-attr">predicate</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>, ... },
+  <span class="hljs-attr">source</span>: {
+    <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;select&quot;</span>,
+    <span class="hljs-attr">selector</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>, <span class="hljs-attr">properties</span>: { ... } },
+    <span class="hljs-attr">source</span>: {
+      <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;from&quot;</span>,
+      <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;employees&quot;</span>
+    }
+  }
+}
+</code></pre>
+<h3 id="stage-2%3A-normalization-passes" tabindex="-1"><a class="anchor" href="#stage-2%3A-normalization-passes" aria-hidden="true">#</a> Stage 2: Normalization Passes</h3>
+<p>Normalization passes transform the operation tree to handle SQL constraints and optimize structure. These run <strong>after parsing, before SQL generation</strong>.</p>
+<h4 id="current-normalization-passes%3A" tabindex="-1"><a class="anchor" href="#current-normalization-passes%3A" aria-hidden="true">#</a> Current Normalization Passes:</h4>
+<ol>
+<li><strong><code>normalizeJoins</code></strong> - Converts CROSS JOIN with WHERE to INNER JOIN</li>
+<li><strong><code>wrapWindowFilters</code></strong> - Wraps queries in subqueries when WHERE references window function columns</li>
+</ol>
+<h4 id="window-filter-normalization" tabindex="-1"><a class="anchor" href="#window-filter-normalization" aria-hidden="true">#</a> Window Filter Normalization</h4>
+<p>SQL doesn’t allow filtering on window functions at the same level where they’re defined:</p>
+<pre class="hljs"><code><span class="hljs-comment">-- INVALID ❌</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>, <span class="hljs-built_in">ROW_NUMBER</span>() <span class="hljs-keyword">OVER</span> (...) <span class="hljs-keyword">AS</span> rn
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> rn <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+</code></pre>
+<p>The normalization pass detects this pattern and automatically wraps it:</p>
+<pre class="hljs"><code><span class="hljs-comment">-- VALID ✅ (automatically generated)</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> (
+  <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span>, <span class="hljs-built_in">ROW_NUMBER</span>() <span class="hljs-keyword">OVER</span> (...) <span class="hljs-keyword">AS</span> rn
+  <span class="hljs-keyword">FROM</span> users
+) <span class="hljs-keyword">AS</span> users
+<span class="hljs-keyword">WHERE</span> rn <span class="hljs-operator">=</span> <span class="hljs-number">1</span>
+</code></pre>
+<p><strong>Implementation</strong>: <code>packages/tinqer/src/parser/normalize-window-filters.ts</code></p>
+<p><strong>Algorithm</strong>:</p>
+<ol>
+<li>Traverse operation tree bottom-up</li>
+<li>Track window function column names through SELECT operations</li>
+<li>When WHERE operation is encountered:
+<ul>
+<li>Check if predicate references any tracked window columns</li>
+<li>If yes, wrap the source in a FROM operation with subquery</li>
+</ul>
+</li>
+<li>Propagate window aliases up the tree for nested queries</li>
+</ol>
+<p><strong>Key Design</strong>: The normalization creates a new <code>FromOperation</code> with:</p>
+<ul>
+<li><code>subquery</code>: The original operation tree</li>
+<li><code>aliasHint</code>: Original table name for readability</li>
+</ul>
+<p><strong>Example Transformation</strong>:</p>
+<p>Before:</p>
+<pre class="hljs"><code><span class="hljs-variable constant_">WHERE</span> {
+  <span class="hljs-attr">predicate</span>: rn === <span class="hljs-number">1</span>,
+  <span class="hljs-attr">source</span>: <span class="hljs-variable constant_">SELECT</span> {
+    <span class="hljs-attr">selector</span>: { <span class="hljs-attr">rn</span>: <span class="hljs-title class_">WindowFunction</span>(...) },
+    <span class="hljs-attr">source</span>: <span class="hljs-variable constant_">FROM</span> { <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;users&quot;</span> }
+  }
+}
+</code></pre>
+<p>After:</p>
+<pre class="hljs"><code><span class="hljs-variable constant_">WHERE</span> {
+  <span class="hljs-attr">predicate</span>: rn === <span class="hljs-number">1</span>,
+  <span class="hljs-attr">source</span>: <span class="hljs-variable constant_">FROM</span> {
+    <span class="hljs-attr">subquery</span>: <span class="hljs-variable constant_">SELECT</span> {
+      <span class="hljs-attr">selector</span>: { <span class="hljs-attr">rn</span>: <span class="hljs-title class_">WindowFunction</span>(...) },
+      <span class="hljs-attr">source</span>: <span class="hljs-variable constant_">FROM</span> { <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;users&quot;</span> }
+    },
+    <span class="hljs-attr">aliasHint</span>: <span class="hljs-string">&quot;users&quot;</span>
+  }
+}
+</code></pre>
+<h3 id="stage-3%3A-sql-generation" tabindex="-1"><a class="anchor" href="#stage-3%3A-sql-generation" aria-hidden="true">#</a> Stage 3: SQL Generation</h3>
+<p>The SQL generator traverses the normalized operation tree and emits database-specific SQL.</p>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li>Recursive generation for subqueries</li>
+<li>Adapter-specific parameter formatting (<code>$(name)</code> for pg-promise, <code>@name</code> for better-sqlite3)</li>
+<li>Operation collection stops at subquery boundaries</li>
+<li>Table alias management for joins and derived tables</li>
+</ul>
+<p><strong>Subquery Handling</strong>:</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">generateFrom</span>(<span class="hljs-params"><span class="hljs-attr">operation</span>: <span class="hljs-title class_">FromOperation</span>, <span class="hljs-attr">context</span>: <span class="hljs-title class_">SqlContext</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">if</span> (operation.<span class="hljs-property">subquery</span>) {
+    <span class="hljs-comment">// Recursive call for inner query</span>
+    <span class="hljs-keyword">const</span> innerSql = <span class="hljs-title function_">generateSql</span>(operation.<span class="hljs-property">subquery</span>, context.<span class="hljs-property">params</span>);
+    <span class="hljs-keyword">const</span> alias = operation.<span class="hljs-property">aliasHint</span> || <span class="hljs-string">`t<span class="hljs-subst">${context.aliasCounter++}</span>`</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`FROM (<span class="hljs-subst">${innerSql}</span>) AS &quot;<span class="hljs-subst">${alias}</span>&quot;`</span>;
+  }
+  <span class="hljs-comment">// Regular table</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`FROM &quot;<span class="hljs-subst">${operation.table}</span>&quot;`</span>;
+}
+</code></pre>
+<p><strong>Operation Collection</strong>:</p>
+<pre class="hljs"><code><span class="hljs-keyword">function</span> <span class="hljs-title function_">collectOperations</span>(<span class="hljs-params"><span class="hljs-attr">operation</span>: <span class="hljs-title class_">QueryOperation</span></span>): <span class="hljs-title class_">QueryOperation</span>[] {
+  <span class="hljs-keyword">while</span> (current) {
+    operations.<span class="hljs-title function_">push</span>(current);
+
+    <span class="hljs-comment">// Stop at subquery boundary - inner operations handled separately</span>
+    <span class="hljs-keyword">if</span> (current.<span class="hljs-property">operationType</span> === <span class="hljs-string">&quot;from&quot;</span> &amp;&amp; current.<span class="hljs-property">subquery</span>) {
+      <span class="hljs-keyword">break</span>;
+    }
+
+    current = current.<span class="hljs-property">source</span>;
+  }
+  <span class="hljs-keyword">return</span> operations.<span class="hljs-title function_">reverse</span>();
+}
+</code></pre>
+<h3 id="normalization-pass-pattern" tabindex="-1"><a class="anchor" href="#normalization-pass-pattern" aria-hidden="true">#</a> Normalization Pass Pattern</h3>
+<p>Normalization passes follow a consistent pattern for extensibility:</p>
+<ol>
+<li><strong>Bottom-up traversal</strong>: Process children before parents</li>
+<li><strong>Immutable transforms</strong>: Return new operations rather than mutating</li>
+<li><strong>Context propagation</strong>: Track state (e.g., window aliases) as you traverse</li>
+<li><strong>Conditional wrapping</strong>: Only transform when necessary</li>
+</ol>
+<p><strong>Adding a new normalization pass</strong>:</p>
+<pre class="hljs"><code><span class="hljs-comment">// packages/tinqer/src/parser/normalize-*.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">normalizeXYZ</span>(<span class="hljs-params"><span class="hljs-attr">operation</span>: <span class="hljs-title class_">QueryOperation</span></span>): <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">visit</span>(operation);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">visit</span>(<span class="hljs-params"><span class="hljs-attr">op</span>: <span class="hljs-title class_">QueryOperation</span></span>): <span class="hljs-title class_">QueryOperation</span> {
+  <span class="hljs-comment">// Recursively process source first</span>
+  <span class="hljs-keyword">if</span> (op.<span class="hljs-property">source</span>) {
+    <span class="hljs-keyword">const</span> normalizedSource = <span class="hljs-title function_">visit</span>(op.<span class="hljs-property">source</span>);
+    <span class="hljs-comment">// Apply transformation logic</span>
+    <span class="hljs-comment">// Return transformed operation</span>
+  }
+  <span class="hljs-keyword">return</span> op;
+}
+</code></pre>
+<p>Then add to pipeline in <code>parse-query.ts</code>:</p>
+<pre class="hljs"><code><span class="hljs-keyword">let</span> normalizedOperation = <span class="hljs-title function_">normalizeJoins</span>(result.<span class="hljs-property">operation</span>);
+normalizedOperation = <span class="hljs-title function_">wrapWindowFilters</span>(normalizedOperation);
+normalizedOperation = <span class="hljs-title function_">normalizeXYZ</span>(normalizedOperation); <span class="hljs-comment">// New pass</span>
+</code></pre>
+<h3 id="benefits-of-normalization-architecture" tabindex="-1"><a class="anchor" href="#benefits-of-normalization-architecture" aria-hidden="true">#</a> Benefits of Normalization Architecture</h3>
+<ul>
+<li><strong>Separation of Concerns</strong>: Parser focuses on AST conversion, normalizer on SQL semantics, generator on dialect</li>
+<li><strong>Composability</strong>: Multiple independent passes can be chained</li>
+<li><strong>Testability</strong>: Each pass can be tested in isolation</li>
+<li><strong>Maintainability</strong>: SQL semantics separated from parsing logic</li>
+<li><strong>Extensibility</strong>: New SQL patterns can be added as new passes</li>
+</ul>
+<h2 id="api-layers" tabindex="-1"><a class="anchor" href="#api-layers" aria-hidden="true">#</a> API Layers</h2>
+<h3 id="user-facing-api-(compile-time)" tabindex="-1"><a class="anchor" href="#user-facing-api-(compile-time)" aria-hidden="true">#</a> User-Facing API (Compile-Time)</h3>
+<pre class="hljs"><code><span class="hljs-comment">// Database context provides DSL access</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt; {
+  <span class="hljs-attr">dsl</span>: <span class="hljs-variable constant_">DSL</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;;
+  <span class="hljs-comment">// ... other context properties</span>
+}
+
+<span class="hljs-comment">// DSL object contains query builders</span>
+<span class="hljs-keyword">interface</span> DSL&lt;<span class="hljs-title class_">TSchema</span>&gt; {
+  <span class="hljs-keyword">from</span>&lt;<span class="hljs-title class_">TTable</span> <span class="hljs-keyword">extends</span> keyof <span class="hljs-title class_">TSchema</span>&gt;(<span class="hljs-attr">table</span>: <span class="hljs-title class_">TTable</span>): <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TSchema</span>[<span class="hljs-title class_">TTable</span>]&gt;;
+  query&lt;<span class="hljs-title class_">TResult</span>&gt;(<span class="hljs-attr">builder</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TResult</span>&gt;): <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt;;
+}
+
+<span class="hljs-comment">// Queryable class for type-safe chaining</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Queryable</span>&lt;T&gt; {
+  <span class="hljs-title function_">where</span>(<span class="hljs-attr">predicate</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: T</span>) =&gt;</span> <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">Queryable</span>&lt;T&gt;;
+  select&lt;<span class="hljs-title class_">TResult</span>&gt;(<span class="hljs-attr">selector</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: T</span>) =&gt;</span> <span class="hljs-title class_">TResult</span>): <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt;;
+  orderBy&lt;<span class="hljs-title class_">TKey</span>&gt;(<span class="hljs-attr">keySelector</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: T</span>) =&gt;</span> <span class="hljs-title class_">TKey</span>): <span class="hljs-title class_">OrderedQueryable</span>&lt;T&gt;;
+
+  <span class="hljs-comment">// Terminal operations</span>
+  <span class="hljs-title function_">count</span>(<span class="hljs-attr">predicate</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: T</span>) =&gt;</span> <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+  <span class="hljs-title function_">first</span>(<span class="hljs-attr">predicate</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: T</span>) =&gt;</span> <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">TerminalQuery</span>&lt;T&gt;;
+}
+
+<span class="hljs-comment">// Terminal query marker</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TerminalQuery</span>&lt;T&gt; {
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">_phantom</span>?: T;
+}
+
+<span class="hljs-comment">// Query functions receive (q, params, helpers)</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">QueryFunction</span>&lt;<span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt; = <span class="hljs-function">(<span class="hljs-params">
+  <span class="hljs-attr">q</span>: <span class="hljs-title class_">QueryBuilder</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+  <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">Helpers</span>,
+</span>) =&gt;</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-title class_">TResult</span>&gt;;
+</code></pre>
+<h3 id="parser-api-(runtime)" tabindex="-1"><a class="anchor" href="#parser-api-(runtime)" aria-hidden="true">#</a> Parser API (Runtime)</h3>
+<pre class="hljs"><code><span class="hljs-comment">// Main parsing function</span>
+<span class="hljs-keyword">function</span> parseQuery&lt;<span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span></span>) =&gt;</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+): <span class="hljs-title class_">QueryOperation</span>;
+
+<span class="hljs-comment">// Parses individual lambdas</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseLambda</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: <span class="hljs-title class_">Function</span></span>): <span class="hljs-title class_">Expression</span>;
+
+<span class="hljs-comment">// Converts AST to expressions</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertAstToExpression</span>(<span class="hljs-params"><span class="hljs-attr">ast</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">context</span>: <span class="hljs-title class_">Context</span></span>): <span class="hljs-title class_">Expression</span>;
+
+<span class="hljs-comment">// Converts method chains to operations</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertAstToQueryOperation</span>(<span class="hljs-params"><span class="hljs-attr">ast</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">QueryOperation</span>;
+</code></pre>
+<h3 id="sql-adapter-api" tabindex="-1"><a class="anchor" href="#sql-adapter-api" aria-hidden="true">#</a> SQL Adapter API</h3>
+<pre class="hljs"><code><span class="hljs-comment">// Main execution functions (in adapters)</span>
+<span class="hljs-keyword">function</span> selectStatement&lt;<span class="hljs-title class_">TParams</span>, <span class="hljs-title class_">TResult</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">dsl</span>: DSL&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+    <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+    <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">Helpers</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Queryable</span>&lt;<span class="hljs-title class_">TResult</span>&gt; | <span class="hljs-title class_">TerminalQuery</span>&lt;<span class="hljs-title class_">TResult</span>&gt;,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TResult</span>[]&gt;;
+
+<span class="hljs-keyword">function</span> insertStatement&lt;<span class="hljs-title class_">TParams</span>&gt;(
+  <span class="hljs-attr">schema</span>: <span class="hljs-title class_">DatabaseSchema</span>&lt;<span class="hljs-title class_">TSchema</span>&gt;,
+  <span class="hljs-attr">queryBuilder</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">dsl</span>: DSL&lt;<span class="hljs-title class_">TSchema</span>&gt;, <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>, <span class="hljs-attr">helpers</span>: <span class="hljs-title class_">Helpers</span></span>) =&gt;</span> <span class="hljs-title class_">InsertQuery</span>,
+  <span class="hljs-attr">params</span>: <span class="hljs-title class_">TParams</span>,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;;
+
+<span class="hljs-comment">// SQL generation (internal)</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">generateSql</span>(<span class="hljs-params"><span class="hljs-attr">operation</span>: <span class="hljs-title class_">QueryOperation</span>, <span class="hljs-attr">params</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">string</span>;
+</code></pre>
+<h3 id="current-gaps" tabindex="-1"><a class="anchor" href="#current-gaps" aria-hidden="true">#</a> Current Gaps</h3>
+<ul>
+<li><code>HAVING</code> clauses are not emitted yet. Query builders can shape grouped results, but aggregated filters must be applied by chaining <code>.where</code> after <code>.select</code> or by filtering results in application code.</li>
+</ul>
+<h2 id="complete-example-flow" tabindex="-1"><a class="anchor" href="#complete-example-flow" aria-hidden="true">#</a> Complete Example Flow</h2>
+<h3 id="user-code" tabindex="-1"><a class="anchor" href="#user-code" aria-hidden="true">#</a> User Code</h3>
+<pre class="hljs"><code><span class="hljs-comment">// Create database context</span>
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Execute query with parameter pattern</span>
+<span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">selectStatement</span>(
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> x.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span> &amp;&amp; x.<span class="hljs-property">department</span> === p.<span class="hljs-property">dept</span>)
+      .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: x.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: x.<span class="hljs-property">name</span>, <span class="hljs-attr">age</span>: x.<span class="hljs-property">age</span> }))
+      .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> x.<span class="hljs-property">name</span>)
+      .<span class="hljs-title function_">take</span>(<span class="hljs-number">10</span>),
+  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span>, <span class="hljs-attr">dept</span>: <span class="hljs-string">&quot;Engineering&quot;</span> },
+);
+</code></pre>
+<h3 id="parsed-expression-tree" tabindex="-1"><a class="anchor" href="#parsed-expression-tree" aria-hidden="true">#</a> Parsed Expression Tree</h3>
+<pre class="hljs"><code>{
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;queryOperation&quot;</span>,
+  <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;take&quot;</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">source</span>: {
+    <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;orderBy&quot;</span>,
+    <span class="hljs-attr">keySelector</span>: <span class="hljs-string">&quot;name&quot;</span>,
+    <span class="hljs-attr">direction</span>: <span class="hljs-string">&quot;ascending&quot;</span>,
+    <span class="hljs-attr">source</span>: {
+      <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;select&quot;</span>,
+      <span class="hljs-attr">selector</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;object&quot;</span>,
+        <span class="hljs-attr">properties</span>: [
+          { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;id&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;id&quot;</span> } },
+          { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span> } },
+          { <span class="hljs-attr">key</span>: <span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;age&quot;</span> } }
+        ]
+      },
+      <span class="hljs-attr">source</span>: {
+        <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;where&quot;</span>,
+        <span class="hljs-attr">predicate</span>: {
+          <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;logical&quot;</span>,
+          <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&amp;&amp;&quot;</span>,
+          <span class="hljs-attr">left</span>: {
+            <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>,
+            <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;&gt;=&quot;</span>,
+            <span class="hljs-attr">left</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;age&quot;</span> },
+            <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;param&quot;</span>, <span class="hljs-attr">param</span>: <span class="hljs-string">&quot;p&quot;</span>, <span class="hljs-attr">property</span>: <span class="hljs-string">&quot;minAge&quot;</span> }
+          },
+          <span class="hljs-attr">right</span>: {
+            <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;comparison&quot;</span>,
+            <span class="hljs-attr">operator</span>: <span class="hljs-string">&quot;==&quot;</span>,
+            <span class="hljs-attr">left</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;column&quot;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;department&quot;</span> },
+            <span class="hljs-attr">right</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">&quot;param&quot;</span>, <span class="hljs-attr">param</span>: <span class="hljs-string">&quot;p&quot;</span>, <span class="hljs-attr">property</span>: <span class="hljs-string">&quot;dept&quot;</span> }
+          }
+        },
+        <span class="hljs-attr">source</span>: {
+          <span class="hljs-attr">operationType</span>: <span class="hljs-string">&quot;from&quot;</span>,
+          <span class="hljs-attr">table</span>: <span class="hljs-string">&quot;users&quot;</span>
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="generated-sql" tabindex="-1"><a class="anchor" href="#generated-sql" aria-hidden="true">#</a> Generated SQL</h3>
+<pre class="hljs"><code><span class="hljs-keyword">SELECT</span> id, name, age
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> age <span class="hljs-operator">&gt;=</span> :minAge <span class="hljs-keyword">AND</span> department <span class="hljs-operator">=</span> :dept
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> name <span class="hljs-keyword">ASC</span>
+LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<h2 id="data-flow" tabindex="-1"><a class="anchor" href="#data-flow" aria-hidden="true">#</a> Data Flow</h2>
+<pre class="hljs"><code>User TypeScript Code
+    ↓
+Function.toString()
+    ↓
+OXC Parser (WASM)
+    ↓
+JavaScript AST
+    ↓
+convertAstToQueryOperation()
+    ↓
+Query Operation Tree (simplified, no generics)
+    ↓
+SQL Adapter generateSql()
+    ↓
+SQL String + Parameters
+</code></pre>
+<h2 id="type-safety-guarantees" tabindex="-1"><a class="anchor" href="#type-safety-guarantees" aria-hidden="true">#</a> Type Safety Guarantees</h2>
+<ol>
+<li><strong>Compile-time</strong>: TypeScript validates lambda signatures and types</li>
+<li><strong>Parse-time</strong>: Expression types ensure correct operation combinations</li>
+<li><strong>Generation-time</strong>: SQL adapter validates expression semantics</li>
+</ol>
+<h2 id="performance-considerations" tabindex="-1"><a class="anchor" href="#performance-considerations" aria-hidden="true">#</a> Performance Considerations</h2>
+<ul>
+<li><strong>Parser Caching</strong>: Cache parsed query functions to avoid re-parsing</li>
+<li><strong>Expression Reuse</strong>: Identify and reuse common sub-expressions</li>
+<li><strong>Prepared Statements</strong>: Generated SQL uses parameterized queries</li>
+<li><strong>Lazy Evaluation</strong>: Operations build trees without immediate execution</li>
+</ul>
+<h2 id="security" tabindex="-1"><a class="anchor" href="#security" aria-hidden="true">#</a> Security</h2>
+<ul>
+<li><strong>No String Concatenation</strong>: All values use parameterized queries</li>
+<li><strong>Expression Validation</strong>: Only safe expressions allowed</li>
+<li><strong>No Dynamic Code</strong>: No eval() or Function constructor usage</li>
+<li><strong>SQL Injection Prevention</strong>: Expression tree approach prevents injection by design</li>
+</ul>
+
+      </article>
+
+      <nav class="toc">
+<h2>On This Page</h2>
+<ul>
+  <li><a href="#database-adapters">Database Adapters</a></li>
+  <li><a href="#core-design-principles">Core Design Principles</a></li>
+  <li class="toc-sub"><a href="#dual-type-system">Dual Type System</a></li>
+  <li class="toc-sub"><a href="#expression-trees">Expression Trees</a></li>
+  <li class="toc-sub"><a href="#runtime-lambda-parsing">Runtime Lambda Parsing</a></li>
+  <li><a href="#expression-type-system">Expression Type System</a></li>
+  <li class="toc-sub"><a href="#expression-type-hierarchy">Expression Type Hierarchy</a></li>
+  <li class="toc-sub"><a href="#detailed-expression-types">Detailed Expression Types</a></li>
+  <li><a href="#query-operations">Query Operations</a></li>
+  <li class="toc-sub"><a href="#simplified-operation-structure">Simplified Operation Structure</a></li>
+  <li class="toc-sub"><a href="#base-queryoperation">Base QueryOperation</a></li>
+  <li class="toc-sub"><a href="#chainable-operations">Chainable Operations</a></li>
+  <li class="toc-sub"><a href="#terminal-operations">Terminal Operations</a></li>
+  <li><a href="#query-processing-pipeline">Query Processing Pipeline</a></li>
+  <li class="toc-sub"><a href="#stage-1%3A-parsing-(runtime-lambda-parsing)">Stage 1: Parsing (Runtime Lambda Parsing)</a></li>
+  <li class="toc-sub"><a href="#stage-2%3A-normalization-passes">Stage 2: Normalization Passes</a></li>
+  <li class="toc-sub"><a href="#stage-3%3A-sql-generation">Stage 3: SQL Generation</a></li>
+  <li class="toc-sub"><a href="#normalization-pass-pattern">Normalization Pass Pattern</a></li>
+  <li class="toc-sub"><a href="#benefits-of-normalization-architecture">Benefits of Normalization Architecture</a></li>
+  <li><a href="#api-layers">API Layers</a></li>
+  <li class="toc-sub"><a href="#user-facing-api-(compile-time)">User-Facing API (Compile-Time)</a></li>
+  <li class="toc-sub"><a href="#parser-api-(runtime)">Parser API (Runtime)</a></li>
+  <li class="toc-sub"><a href="#sql-adapter-api">SQL Adapter API</a></li>
+  <li class="toc-sub"><a href="#current-gaps">Current Gaps</a></li>
+  <li><a href="#complete-example-flow">Complete Example Flow</a></li>
+  <li class="toc-sub"><a href="#user-code">User Code</a></li>
+  <li class="toc-sub"><a href="#parsed-expression-tree">Parsed Expression Tree</a></li>
+  <li class="toc-sub"><a href="#generated-sql">Generated SQL</a></li>
+  <li><a href="#data-flow">Data Flow</a></li>
+  <li><a href="#type-safety-guarantees">Type Safety Guarantees</a></li>
+  <li><a href="#performance-considerations">Performance Considerations</a></li>
+  <li><a href="#security">Security</a></li>
+</ul>
+</nav>
+    </div>
+
+    <footer class="page-nav">
+  <a href="development.html" class="prev">← Development</a>
+  <span></span>
+</footer>
+  </main>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    (function() {
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        hamburger.classList.remove('active');
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', closeMenu);
+
+      // Close menu when clicking a nav link
+      const navLinks = sidebar.querySelectorAll('.nav-list a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
