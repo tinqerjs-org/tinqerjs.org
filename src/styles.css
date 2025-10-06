@@ -102,8 +102,8 @@ body {
 }
 
 .logo-icon {
-  width: 32px;
   height: 32px;
+  width: auto;
   flex-shrink: 0;
 }
 
@@ -587,8 +587,8 @@ body {
 }
 
 .mobile-logo .logo-icon {
-  width: 28px;
   height: 28px;
+  width: auto;
 }
 
 .hamburger {
@@ -654,6 +654,13 @@ body {
    Responsive Design
    ============================================ */
 
+/* Hide TOC on screens smaller than 1600px */
+@media (max-width: 1600px) {
+  .toc {
+    display: none;
+  }
+}
+
 @media (max-width: 960px) {
   /* Don't hide horizontal overflow - we need it for code blocks */
   html, body {
@@ -676,10 +683,6 @@ body {
 
   .mobile-overlay {
     display: block;
-  }
-
-  .toc {
-    display: none;
   }
 
   .content-wrapper {
