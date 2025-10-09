@@ -1367,10 +1367,10 @@
 <p>External variables must be passed via the params object - closure variables are not supported:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">insertStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
     q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
-      <span class="hljs-attr">name</span>: p.<span class="hljs-property">name</span>,
-      <span class="hljs-attr">age</span>: p.<span class="hljs-property">age</span>,
+      <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span>,
+      <span class="hljs-attr">age</span>: params.<span class="hljs-property">age</span>,
       <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;default@example.com&quot;</span>,
     }),
   { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">25</span> },
@@ -1450,10 +1450,10 @@
 <p>External variables must be passed via the params object:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> updateStmt = <span class="hljs-title function_">updateStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span>
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
-      .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: p.<span class="hljs-property">newAge</span> })
+      .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: params.<span class="hljs-property">newAge</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">1</span>),
   { <span class="hljs-attr">newAge</span>: <span class="hljs-number">32</span> },
 );
@@ -1520,7 +1520,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <h4 id="delete-with-in-clause" tabindex="-1"><a class="anchor" href="#delete-with-in-clause" aria-hidden="true">#</a> DELETE with IN Clause</h4>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> del = <span class="hljs-title function_">deleteStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q, p</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> p.<span class="hljs-property">userIds</span>.<span class="hljs-title function_">includes</span>(u.<span class="hljs-property">id</span>)),
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> params.<span class="hljs-property">userIds</span>.<span class="hljs-title function_">includes</span>(u.<span class="hljs-property">id</span>)),
   { <span class="hljs-attr">userIds</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>] },
 );
 </code></pre>
