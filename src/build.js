@@ -174,7 +174,13 @@ function build() {
   console.log('Copying logo.svg...');
   const LOGO_PATH = path.resolve(__dirname, 'logo.svg');
   fs.copyFileSync(LOGO_PATH, path.join(BUILD_DIR, 'logo.svg'));
-  console.log('  ✓ Copied logo.svg\n');
+  console.log('  ✓ Copied logo.svg');
+
+  // Copy llms.txt
+  console.log('Copying llms.txt...');
+  const LLMS_PATH = path.join(TINQER_REPO, 'llms.txt');
+  fs.copyFileSync(LLMS_PATH, path.join(BUILD_DIR, 'llms.txt'));
+  console.log('  ✓ Copied llms.txt\n');
 
   // Build all pages
   pages.forEach((page, index) => {
