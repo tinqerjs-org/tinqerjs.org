@@ -168,7 +168,11 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// UPDATE</span>
 <span class="hljs-keyword">const</span> update = <span class="hljs-title function_">updateStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: params.<span class="hljs-property">newAge</span> }).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === params.<span class="hljs-property">userId</span>),
+  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
+      .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: params.<span class="hljs-property">newAge</span> })
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === params.<span class="hljs-property">userId</span>),
   { <span class="hljs-attr">newAge</span>: <span class="hljs-number">31</span>, <span class="hljs-attr">userId</span>: <span class="hljs-number">1</span> },
 );
 <span class="hljs-comment">// update.sql: UPDATE &quot;users&quot; SET &quot;age&quot; = $(newAge) WHERE &quot;id&quot; = $(userId)</span>
@@ -328,6 +332,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>),
   { <span class="hljs-attr">cutoffDate</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2023-01-01&quot;</span>) },
 );
+
+<span class="hljs-comment">// Tip: undefined values in .set() or .values() are ignored; explicit null sets NULL.</span>
 
 <span class="hljs-comment">// DELETE</span>
 <span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(

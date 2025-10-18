@@ -1381,6 +1381,9 @@
 <span class="hljs-keyword">VALUES</span> ($(name), $(age), $(__p1))  <span class="hljs-comment">-- PostgreSQL</span>
 <span class="hljs-keyword">VALUES</span> (<span class="hljs-variable">@name</span>, <span class="hljs-variable">@age</span>, @__p1)        <span class="hljs-comment">-- SQLite</span>
 </code></pre>
+<blockquote>
+<p><strong>Tip:</strong> When a property in <code>.values()</code> evaluates to <code>undefined</code>, the column is omitted from the INSERT. Explicit <code>null</code> values still emit <code>NULL</code>. The insert throws if every value is <code>undefined</code>.</p>
+</blockquote>
 <h4 id="insert-with-returning-clause" tabindex="-1"><a class="anchor" href="#insert-with-returning-clause" aria-hidden="true">#</a> INSERT with RETURNING Clause</h4>
 <p>Both PostgreSQL and SQLite (3.35.0+) support the RETURNING clause to retrieve values from inserted rows:</p>
 <pre class="hljs"><code><span class="hljs-comment">// Return specific columns</span>
@@ -1446,6 +1449,9 @@
 <span class="hljs-keyword">SET</span> &quot;age&quot; <span class="hljs-operator">=</span> @__p1, &quot;lastModified&quot; <span class="hljs-operator">=</span> @__p2
 <span class="hljs-keyword">WHERE</span> &quot;id&quot; <span class="hljs-operator">=</span> @__p3
 </code></pre>
+<blockquote>
+<p><strong>Tip:</strong> If any property in the <code>.set()</code> object evaluates to <code>undefined</code> (for example because a parameter was omitted), Tinqer simply skips that column. Explicit <code>null</code> values still generate <code>SET column = NULL</code>. The query builder throws if every assignment resolves to <code>undefined</code>.</p>
+</blockquote>
 <h4 id="update-with-external-parameters" tabindex="-1"><a class="anchor" href="#update-with-external-parameters" aria-hidden="true">#</a> UPDATE with External Parameters</h4>
 <p>External variables must be passed via the params object:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> updateStmt = <span class="hljs-title function_">updateStatement</span>(
