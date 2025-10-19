@@ -279,7 +279,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-keyword">const</span> topEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q, h</span>) =&gt;</span>
+  <span class="hljs-function">(<span class="hljs-params">q, params, h</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
@@ -291,6 +291,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
           .<span class="hljs-title function_">rowNumber</span>(),
       }))
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
+  {},
 );
 
 <span class="hljs-comment">// Generated SQL (automatically wrapped):</span>

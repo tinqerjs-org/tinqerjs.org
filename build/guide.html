@@ -156,7 +156,7 @@
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
-<span class="hljs-keyword">const</span> adults = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
+<span class="hljs-keyword">const</span> adults = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
 </code></pre>
 <pre class="hljs"><code><span class="hljs-comment">-- PostgreSQL</span>
 <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> &quot;users&quot; <span class="hljs-keyword">WHERE</span> &quot;age&quot; <span class="hljs-operator">&gt;=</span> $(__p1)
@@ -170,7 +170,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> activeRange = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">21</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt;= <span class="hljs-number">60</span>)
@@ -192,7 +192,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> premium = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> (u.<span class="hljs-property">salary</span> * <span class="hljs-number">0.9</span> &gt; <span class="hljs-number">150_000</span> &amp;&amp; u.<span class="hljs-property">age</span> &lt; <span class="hljs-number">55</span>) || u.<span class="hljs-property">active</span> === <span class="hljs-literal">false</span>),
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> (u.<span class="hljs-property">salary</span> * <span class="hljs-number">0.9</span> &gt; <span class="hljs-number">150_000</span> &amp;&amp; u.<span class="hljs-property">age</span> &lt; <span class="hljs-number">55</span>) || u.<span class="hljs-property">active</span> === <span class="hljs-literal">false</span>),
   {},
 );
 </code></pre>
@@ -209,7 +209,7 @@
 <h3 id="14-null-checks-and-null-coalescing" tabindex="-1"><a class="anchor" href="#14-null-checks-and-null-coalescing" aria-hidden="true">#</a> 1.4 Null Checks and Null Coalescing</h3>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> preferredName = <span class="hljs-title function_">selectStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> (u.<span class="hljs-property">nickname</span> ?? u.<span class="hljs-property">name</span>) === <span class="hljs-string">&quot;anonymous&quot;</span>),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> (u.<span class="hljs-property">nickname</span> ?? u.<span class="hljs-property">name</span>) === <span class="hljs-string">&quot;anonymous&quot;</span>),
   {},
 );
 </code></pre>
@@ -225,7 +225,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> emailFilters = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;admin&quot;</span>))
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>))
@@ -265,7 +265,7 @@
 <h3 id="17-array-membership-(in)" tabindex="-1"><a class="anchor" href="#17-array-membership-(in)" aria-hidden="true">#</a> 1.7 Array Membership (IN)</h3>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> allowed = <span class="hljs-title function_">selectStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> [<span class="hljs-string">&quot;admin&quot;</span>, <span class="hljs-string">&quot;support&quot;</span>, <span class="hljs-string">&quot;auditor&quot;</span>].<span class="hljs-title function_">includes</span>(u.<span class="hljs-property">role</span>)),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> [<span class="hljs-string">&quot;admin&quot;</span>, <span class="hljs-string">&quot;support&quot;</span>, <span class="hljs-string">&quot;auditor&quot;</span>].<span class="hljs-title function_">includes</span>(u.<span class="hljs-property">role</span>)),
   {},
 );
 </code></pre>
@@ -326,7 +326,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> summary = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({
@@ -349,12 +349,12 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ProductSchema</span> {
   <span class="hljs-attr">products</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">price</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">discount</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">null</span> };
 }
-<span class="hljs-keyword">const</span> productContext = createSchema&lt;<span class="hljs-title class_">ProductSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">ProductSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> pricing = <span class="hljs-title function_">selectStatement</span>(
-  productContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;products&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> ({
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;products&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> ({
       <span class="hljs-attr">id</span>: p.<span class="hljs-property">id</span>,
       <span class="hljs-attr">name</span>: p.<span class="hljs-property">name</span>,
       <span class="hljs-attr">effectivePrice</span>: p.<span class="hljs-property">price</span> - (p.<span class="hljs-property">discount</span> ?? <span class="hljs-number">0</span>),
@@ -374,7 +374,7 @@
 <h2 id="3-ordering" tabindex="-1"><a class="anchor" href="#3-ordering" aria-hidden="true">#</a> 3. Ordering</h2>
 <p>Methods <code>orderBy</code>, <code>orderByDescending</code>, <code>thenBy</code>, and <code>thenByDescending</code> control result ordering.</p>
 <h3 id="31-single-key-ascending" tabindex="-1"><a class="anchor" href="#31-single-key-ascending" aria-hidden="true">#</a> 3.1 Single Key Ascending</h3>
-<pre class="hljs"><code><span class="hljs-keyword">const</span> alphabetical = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>), {});
+<pre class="hljs"><code><span class="hljs-keyword">const</span> alphabetical = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>), {});
 </code></pre>
 <pre class="hljs"><code><span class="hljs-comment">-- PostgreSQL</span>
 <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> &quot;users&quot; <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> &quot;name&quot; <span class="hljs-keyword">ASC</span>
@@ -386,7 +386,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> ordered = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>)
       .<span class="hljs-title function_">thenByDescending</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">salary</span>)
@@ -405,7 +405,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> departments = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>)
       .<span class="hljs-title function_">distinct</span>(),
@@ -425,7 +425,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> page = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>)
       .<span class="hljs-title function_">skip</span>(<span class="hljs-number">30</span>)
@@ -445,7 +445,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> filteredPage = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
@@ -470,13 +470,13 @@
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">departmentId</span>: <span class="hljs-built_in">number</span> };
   <span class="hljs-attr">departments</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
 }
-<span class="hljs-keyword">const</span> joinContext = createSchema&lt;<span class="hljs-title class_">JoinSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">JoinSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> userDepartments = <span class="hljs-title function_">selectStatement</span>(
-  joinContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">join</span>(
-      ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">join</span>(
+      q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
       <span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>,
       <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> d.<span class="hljs-property">id</span>,
       <span class="hljs-function">(<span class="hljs-params">u, d</span>) =&gt;</span> ({ <span class="hljs-attr">userName</span>: u.<span class="hljs-property">name</span>, <span class="hljs-attr">departmentName</span>: d.<span class="hljs-property">name</span> }),
@@ -499,16 +499,16 @@
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> };
   <span class="hljs-attr">orders</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">userId</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">total</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> orderContext = createSchema&lt;<span class="hljs-title class_">OrderSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">OrderSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> regionOrders = <span class="hljs-title function_">selectStatement</span>(
-  orderContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> &gt; <span class="hljs-number">100</span>)
       .<span class="hljs-title function_">join</span>(
-        ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>),
+        q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>),
         <span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>,
         <span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">userId</span>,
         <span class="hljs-function">(<span class="hljs-params">u, o</span>) =&gt;</span> ({ <span class="hljs-attr">userName</span>: u.<span class="hljs-property">name</span>, <span class="hljs-attr">total</span>: o.<span class="hljs-property">total</span> }),
@@ -533,12 +533,12 @@
 </code></pre>
 <h3 id="63-join-with-grouped-results" tabindex="-1"><a class="anchor" href="#63-join-with-grouped-results" aria-hidden="true">#</a> 6.3 Join with Grouped Results</h3>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> totalsByDepartment = <span class="hljs-title function_">selectStatement</span>(
-  orderContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">join</span>(
-        ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>),
+        q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>),
         <span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>,
         <span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">userId</span>,
         <span class="hljs-function">(<span class="hljs-params">u, o</span>) =&gt;</span> ({ u, o }),
@@ -567,12 +567,12 @@
 <h3 id="64-left-outer-join" tabindex="-1"><a class="anchor" href="#64-left-outer-join" aria-hidden="true">#</a> 6.4 Left Outer Join</h3>
 <p>Model the classic LINQ pattern: start with <code>groupJoin</code>, then expand the grouped results with <code>selectMany(...defaultIfEmpty())</code>. Any missing matches appear as <code>null</code> in the projection.</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> usersWithDepartments = <span class="hljs-title function_">selectStatement</span>(
-  joinContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">groupJoin</span>(
-        ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
+        q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>),
         <span class="hljs-function">(<span class="hljs-params">user</span>) =&gt;</span> user.<span class="hljs-property">departmentId</span>,
         <span class="hljs-function">(<span class="hljs-params">department</span>) =&gt;</span> department.<span class="hljs-property">id</span>,
         <span class="hljs-function">(<span class="hljs-params">user, deptGroup</span>) =&gt;</span> ({ user, deptGroup }),
@@ -601,12 +601,12 @@
 <h3 id="65-cross-join" tabindex="-1"><a class="anchor" href="#65-cross-join" aria-hidden="true">#</a> 6.5 Cross Join</h3>
 <p>Return a <code>Queryable</code> from the collection selector passed to <code>selectMany</code>. Because we skip <code>defaultIfEmpty</code>, the parser normalizes the operation into a <code>CROSS JOIN</code>.</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> departmentUsers = <span class="hljs-title function_">selectStatement</span>(
-  joinContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;departments&quot;</span>)
       .<span class="hljs-title function_">selectMany</span>(
-        <span class="hljs-function">() =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>),
+        <span class="hljs-function">() =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>),
         <span class="hljs-function">(<span class="hljs-params">department, user</span>) =&gt;</span> ({ department, user }),
       )
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> ({
@@ -633,7 +633,7 @@
 <h3 id="71-basic-grouping" tabindex="-1"><a class="anchor" href="#71-basic-grouping" aria-hidden="true">#</a> 7.1 Basic Grouping</h3>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> byDepartment = <span class="hljs-title function_">selectStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">groupBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">groupBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>),
   {},
 );
 </code></pre>
@@ -647,7 +647,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> departmentStats = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">groupBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">g</span>) =&gt;</span> ({
@@ -678,7 +678,7 @@
   db,
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">groupBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">g</span>) =&gt;</span> ({ <span class="hljs-attr">departmentId</span>: g.<span class="hljs-property">key</span>, <span class="hljs-attr">headcount</span>: g.<span class="hljs-title function_">count</span>() }))
@@ -701,10 +701,10 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">EmployeeSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">department</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">salary</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> empContext = createSchema&lt;<span class="hljs-title class_">EmployeeSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">EmployeeSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> rankedEmployees = <span class="hljs-title function_">selectStatement</span>(
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -733,10 +733,10 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">OrderTimeSchema</span> {
   <span class="hljs-attr">orders</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">createdAt</span>: <span class="hljs-title class_">Date</span> };
 }
-<span class="hljs-keyword">const</span> orderTimeContext = createSchema&lt;<span class="hljs-title class_">OrderTimeSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">OrderTimeSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> chronological = <span class="hljs-title function_">selectStatement</span>(
-  orderTimeContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;orders&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> ({
       <span class="hljs-attr">orderId</span>: o.<span class="hljs-property">id</span>,
@@ -756,10 +756,10 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">RegionEmployeeSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">region</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">department</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">salary</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> regionEmpContext = createSchema&lt;<span class="hljs-title class_">RegionEmployeeSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">RegionEmployeeSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> multiPartition = <span class="hljs-title function_">selectStatement</span>(
-  regionEmpContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -782,7 +782,7 @@
 </code></pre>
 <h4 id="secondary-ordering-with-thenby" tabindex="-1"><a class="anchor" href="#secondary-ordering-with-thenby" aria-hidden="true">#</a> Secondary Ordering with thenBy</h4>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> ranked = <span class="hljs-title function_">selectStatement</span>(
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -804,7 +804,7 @@
 <h3 id="82-rank" tabindex="-1"><a class="anchor" href="#82-rank" aria-hidden="true">#</a> 8.2 RANK</h3>
 <p><code>RANK()</code> assigns ranks with gaps for tied values. If two rows have the same rank, the next rank skips numbers.</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> rankedSalaries = <span class="hljs-title function_">selectStatement</span>(
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -860,10 +860,10 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">PlayerSchema</span> {
   <span class="hljs-attr">players</span>: { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">score</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> playerContext = createSchema&lt;<span class="hljs-title class_">PlayerSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">PlayerSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> globalRank = <span class="hljs-title function_">selectStatement</span>(
-  playerContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;players&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">p</span>) =&gt;</span> ({
       <span class="hljs-attr">player</span>: p.<span class="hljs-property">name</span>,
@@ -883,7 +883,7 @@
 <h3 id="83-dense_rank" tabindex="-1"><a class="anchor" href="#83-dense_rank" aria-hidden="true">#</a> 8.3 DENSE_RANK</h3>
 <p><code>DENSE_RANK()</code> assigns ranks without gaps. Tied values receive the same rank, and the next rank is consecutive.</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> denseRanked = <span class="hljs-title function_">selectStatement</span>(
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -938,10 +938,10 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">EmployeeAgeSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">department</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">salary</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> empAgeContext = createSchema&lt;<span class="hljs-title class_">EmployeeAgeSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">EmployeeAgeSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> complexRanking = <span class="hljs-title function_">selectStatement</span>(
-  empAgeContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -967,7 +967,7 @@
 <h3 id="84-multiple-window-functions" tabindex="-1"><a class="anchor" href="#84-multiple-window-functions" aria-hidden="true">#</a> 8.4 Multiple Window Functions</h3>
 <p>Combine multiple window functions in a single SELECT:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> allRankings = <span class="hljs-title function_">selectStatement</span>(
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>).<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
       <span class="hljs-attr">name</span>: e.<span class="hljs-property">name</span>,
@@ -1012,7 +1012,7 @@
 <p>Get the top earner from each department:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> topEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  empContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
@@ -1050,11 +1050,11 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">EmployeeDeptSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">salary</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">department_id</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> empDeptContext = createSchema&lt;<span class="hljs-title class_">EmployeeDeptSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">EmployeeDeptSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> top3Engineering = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  empDeptContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
@@ -1086,11 +1086,11 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">PerformanceSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">performance_score</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> perfContext = createSchema&lt;<span class="hljs-title class_">PerformanceSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">PerformanceSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> topPerformers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  perfContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
@@ -1117,11 +1117,11 @@
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ActiveEmployeeSchema</span> {
   <span class="hljs-attr">employees</span>: { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">department</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">salary</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">is_active</span>: <span class="hljs-built_in">boolean</span> };
 }
-<span class="hljs-keyword">const</span> activeEmpContext = createSchema&lt;<span class="hljs-title class_">ActiveEmployeeSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">ActiveEmployeeSchema</span>&gt;();
 
 <span class="hljs-keyword">const</span> activeTopEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  activeEmpContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
@@ -1159,7 +1159,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> totals = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span> === <span class="hljs-literal">true</span>)
       .<span class="hljs-title function_">sum</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">salary</span>),
@@ -1175,7 +1175,7 @@
 <pre class="hljs"><code><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;__p1&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span>
 </code></pre>
 <p>Methods <code>count</code>, <code>average</code>, <code>min</code>, and <code>max</code> follow the same structure. The <code>count</code> method also accepts a predicate:</p>
-<pre class="hljs"><code><span class="hljs-keyword">const</span> activeCount = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">count</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span>), {});
+<pre class="hljs"><code><span class="hljs-keyword">const</span> activeCount = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">count</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span>), {});
 </code></pre>
 <pre class="hljs"><code><span class="hljs-comment">-- PostgreSQL</span>
 <span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>) <span class="hljs-keyword">FROM</span> &quot;users&quot; <span class="hljs-keyword">WHERE</span> &quot;active&quot;
@@ -1187,7 +1187,7 @@
 <h2 id="10-quantifiers" tabindex="-1"><a class="anchor" href="#10-quantifiers" aria-hidden="true">#</a> 10. Quantifiers</h2>
 <p>Methods <code>any</code> and <code>all</code> test whether elements satisfy conditions.</p>
 <h3 id="101-any-operation" tabindex="-1"><a class="anchor" href="#101-any-operation" aria-hidden="true">#</a> 10.1 Any Operation</h3>
-<pre class="hljs"><code><span class="hljs-keyword">const</span> hasAdults = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">any</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
+<pre class="hljs"><code><span class="hljs-keyword">const</span> hasAdults = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">any</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
 </code></pre>
 <pre class="hljs"><code><span class="hljs-comment">-- PostgreSQL</span>
 <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CASE</span> <span class="hljs-keyword">WHEN</span> <span class="hljs-keyword">EXISTS</span>(<span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span> <span class="hljs-keyword">FROM</span> &quot;users&quot; <span class="hljs-keyword">WHERE</span> &quot;age&quot; <span class="hljs-operator">&gt;=</span> $(__p1)) <span class="hljs-keyword">THEN</span> <span class="hljs-number">1</span> <span class="hljs-keyword">ELSE</span> <span class="hljs-number">0</span> <span class="hljs-keyword">END</span>
@@ -1201,7 +1201,7 @@
 <p>The <code>all</code> method emits a <code>NOT EXISTS</code> check:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> allActive = <span class="hljs-title function_">selectStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">all</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span> === <span class="hljs-literal">true</span>),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">all</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span> === <span class="hljs-literal">true</span>),
   {},
 );
 </code></pre>
@@ -1217,7 +1217,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> newestUser = <span class="hljs-title function_">selectStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">createdAt</span>)
       .<span class="hljs-title function_">last</span>(),
@@ -1242,7 +1242,7 @@
   db,
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
@@ -1346,7 +1346,7 @@
 <span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">insertStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>,
       <span class="hljs-attr">age</span>: <span class="hljs-number">30</span>,
       <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span>,
@@ -1390,7 +1390,7 @@
 <span class="hljs-keyword">const</span> insertWithReturn = <span class="hljs-title function_">insertStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Charlie&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">35</span> })
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">createdAt</span>: u.<span class="hljs-property">createdAt</span> })),
@@ -1401,7 +1401,7 @@
 <span class="hljs-keyword">const</span> insertReturnAll = <span class="hljs-title function_">insertStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;David&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">40</span> })
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u), <span class="hljs-comment">// Returns *</span>
@@ -1412,7 +1412,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">insertStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Eve&quot;</span>,
       <span class="hljs-attr">email</span>: <span class="hljs-literal">null</span>, <span class="hljs-comment">// Generates NULL, not parameterized</span>
       <span class="hljs-attr">phone</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-comment">// Column omitted from INSERT</span>
@@ -1431,7 +1431,7 @@
 <span class="hljs-keyword">const</span> updateStmt = <span class="hljs-title function_">updateStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: <span class="hljs-number">31</span>, <span class="hljs-attr">lastModified</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>() })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">1</span>),
@@ -1468,7 +1468,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> updateStmt = <span class="hljs-title function_">updateStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2023-01-01&quot;</span>) &amp;&amp; u.<span class="hljs-property">role</span> !== <span class="hljs-string">&quot;admin&quot;</span>),
@@ -1479,7 +1479,7 @@
 <pre class="hljs"><code><span class="hljs-keyword">const</span> updateWithReturn = <span class="hljs-title function_">updateStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: <span class="hljs-number">32</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">2</span>)
@@ -1491,7 +1491,7 @@
 <pre class="hljs"><code><span class="hljs-comment">// UPDATE without WHERE requires explicit permission</span>
 <span class="hljs-keyword">const</span> updateAll = <span class="hljs-title function_">updateStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">set</span>({ <span class="hljs-attr">isActive</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">allowFullTableUpdate</span>(), <span class="hljs-comment">// Required flag</span>
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">set</span>({ <span class="hljs-attr">isActive</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">allowFullTableUpdate</span>(), <span class="hljs-comment">// Required flag</span>
   {},
 );
 </code></pre>
@@ -1507,7 +1507,7 @@ Full table updates are dangerous and must be explicitly allowed.
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
-<span class="hljs-keyword">const</span> del = <span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">100</span>), {});
+<span class="hljs-keyword">const</span> del = <span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">100</span>), {});
 </code></pre>
 <p>Generated SQL:</p>
 <pre class="hljs"><code><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> &quot;users&quot; <span class="hljs-keyword">WHERE</span> &quot;age&quot; <span class="hljs-operator">&gt;</span> $(__p1)  <span class="hljs-comment">-- PostgreSQL</span>
@@ -1517,7 +1517,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <pre class="hljs"><code><span class="hljs-keyword">const</span> del = <span class="hljs-title function_">deleteStatement</span>(
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">isDeleted</span> === <span class="hljs-literal">true</span> || (u.<span class="hljs-property">age</span> &lt; <span class="hljs-number">18</span> &amp;&amp; u.<span class="hljs-property">role</span> !== <span class="hljs-string">&quot;admin&quot;</span>) || u.<span class="hljs-property">email</span> === <span class="hljs-literal">null</span>),
   {},
@@ -1552,7 +1552,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <pre class="hljs"><code><span class="hljs-comment">// DELETE without WHERE requires explicit permission</span>
 <span class="hljs-keyword">const</span> deleteAll = <span class="hljs-title function_">deleteStatement</span>(
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">allowFullTableDelete</span>(), <span class="hljs-comment">// Required flag</span>
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">allowFullTableDelete</span>(), <span class="hljs-comment">// Required flag</span>
   {},
 );
 </code></pre>
@@ -1561,24 +1561,24 @@ Full table updates are dangerous and must be explicitly allowed.
 <h4 id="mandatory-where-clauses" tabindex="-1"><a class="anchor" href="#mandatory-where-clauses" aria-hidden="true">#</a> Mandatory WHERE Clauses</h4>
 <p>UPDATE and DELETE operations require WHERE clauses by default to prevent accidental full-table operations:</p>
 <pre class="hljs"><code><span class="hljs-comment">// This throws an error</span>
-<span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>), {});
+<span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>), {});
 <span class="hljs-comment">// Error: DELETE requires a WHERE clause or explicit allowFullTableDelete()</span>
 
 <span class="hljs-comment">// This works</span>
-<span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">allowFullTableDelete</span>(), {});
+<span class="hljs-title function_">deleteStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">allowFullTableDelete</span>(), {});
 </code></pre>
 <h4 id="type-safety" tabindex="-1"><a class="anchor" href="#type-safety" aria-hidden="true">#</a> Type Safety</h4>
 <p>All CRUD operations maintain full TypeScript type safety:</p>
 <pre class="hljs"><code><span class="hljs-keyword">interface</span> <span class="hljs-title class_">UserSchema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
 }
-<span class="hljs-keyword">const</span> userContext = createSchema&lt;<span class="hljs-title class_">UserSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">UserSchema</span>&gt;();
 
 <span class="hljs-comment">// Type error: &#x27;username&#x27; doesn&#x27;t exist on users table</span>
 <span class="hljs-title function_">insertStatement</span>(
-  userContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">username</span>: <span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-comment">// ❌ Type error</span>
     }),
   {},
@@ -1586,9 +1586,9 @@ Full table updates are dangerous and must be explicitly allowed.
 
 <span class="hljs-comment">// Type error: age must be number</span>
 <span class="hljs-title function_">updateStatement</span>(
-  userContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">set</span>({
+    q.<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">set</span>({
       <span class="hljs-attr">age</span>: <span class="hljs-string">&quot;30&quot;</span>, <span class="hljs-comment">// ❌ Type error - must be number</span>
     }),
   {},
@@ -1598,9 +1598,9 @@ Full table updates are dangerous and must be explicitly allowed.
 <p>All values are automatically parameterized to prevent SQL injection:</p>
 <pre class="hljs"><code><span class="hljs-keyword">const</span> maliciousName = <span class="hljs-string">&quot;&#x27;; DROP TABLE users; --&quot;</span>;
 <span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">insertStatement</span>(
-  userContext,
+  schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">name</span>: maliciousName, <span class="hljs-comment">// Safely parameterized</span>
     }),
   {},
@@ -1618,7 +1618,7 @@ Full table updates are dangerous and must be explicitly allowed.
   db,
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Frank&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">28</span> })
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
@@ -1631,7 +1631,7 @@ Full table updates are dangerous and must be explicitly allowed.
   db,
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: <span class="hljs-number">29</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">123</span>),
@@ -1643,7 +1643,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <span class="hljs-keyword">const</span> deleteCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
   db,
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">123</span>),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === <span class="hljs-number">123</span>),
   {},
 );
 </code></pre>
@@ -1654,7 +1654,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <span class="hljs-keyword">const</span> insertCount = <span class="hljs-title function_">executeInsert</span>(
   db,
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Grace&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span> }),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Grace&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span> }),
   {},
 );
 <span class="hljs-comment">// Returns number of inserted rows</span>
@@ -1664,7 +1664,7 @@ Full table updates are dangerous and must be explicitly allowed.
   db,
   schema,
   <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-    ctx
+    q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: <span class="hljs-number">33</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span> === <span class="hljs-string">&quot;Henry&quot;</span>),
@@ -1675,7 +1675,7 @@ Full table updates are dangerous and must be explicitly allowed.
 <span class="hljs-keyword">const</span> deleteCount = <span class="hljs-title function_">executeDelete</span>(
   db,
   schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">100</span>),
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">100</span>),
   {},
 );
 </code></pre>
@@ -1686,15 +1686,15 @@ Full table updates are dangerous and must be explicitly allowed.
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">lastLogin</span>: <span class="hljs-title class_">Date</span> };
   <span class="hljs-attr">user_logs</span>: { <span class="hljs-attr">userId</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">action</span>: <span class="hljs-built_in">string</span> };
 }
-<span class="hljs-keyword">const</span> txContext = createSchema&lt;<span class="hljs-title class_">TxSchema</span>&gt;();
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">TxSchema</span>&gt;();
 
 <span class="hljs-comment">// PostgreSQL transactions</span>
 <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">tx</span>(<span class="hljs-title function_">async</span> (t) =&gt; {
   <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
     t,
-    txContext,
+    schema,
     <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-      ctx
+      q
         .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
         .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ivy&quot;</span> })
         .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>),
@@ -1703,9 +1703,9 @@ Full table updates are dangerous and must be explicitly allowed.
 
   <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
     t,
-    txContext,
+    schema,
     <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-      ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;user_logs&quot;</span>).<span class="hljs-title function_">values</span>({
+      q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;user_logs&quot;</span>).<span class="hljs-title function_">values</span>({
         <span class="hljs-attr">userId</span>: users[<span class="hljs-number">0</span>]!.<span class="hljs-property">id</span>,
         <span class="hljs-attr">action</span>: <span class="hljs-string">&quot;created&quot;</span>,
       }),
@@ -1715,12 +1715,12 @@ Full table updates are dangerous and must be explicitly allowed.
 
 <span class="hljs-comment">// SQLite transactions</span>
 <span class="hljs-keyword">const</span> transaction = sqliteDb.<span class="hljs-title function_">transaction</span>(<span class="hljs-function">() =&gt;</span> {
-  <span class="hljs-title function_">executeInsert</span>(db, txContext, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> ctx.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Jack&quot;</span> }), {});
+  <span class="hljs-title function_">executeInsert</span>(db, schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Jack&quot;</span> }), {});
   <span class="hljs-title function_">executeUpdate</span>(
     db,
-    txContext,
+    schema,
     <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
-      ctx
+      q
         .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
         .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">lastLogin</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>() })
         .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span> === <span class="hljs-string">&quot;Jack&quot;</span>),
