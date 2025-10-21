@@ -139,7 +139,7 @@
 <span class="hljs-comment">// params: { minAge: 18 }</span>
 </code></pre>
 <p><strong>Example - Execution</strong></p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -150,12 +150,12 @@
 
 <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
-  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">21</span> },
 );
 <span class="hljs-comment">// Returns: Array of user objects</span>
@@ -208,7 +208,7 @@
 <span class="hljs-comment">// params: { name: &quot;Alice&quot; }</span>
 </code></pre>
 <p><strong>Example - Execution</strong></p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineInsert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeInsert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -220,21 +220,20 @@
 <span class="hljs-comment">// Without RETURNING - returns number of rows inserted</span>
 <span class="hljs-keyword">const</span> rowCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
   db,
-  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span> }</span>) =&gt;</span>
-    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span> }),
-  ),
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span> }</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span> }),
   { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span> },
 );
 
 <span class="hljs-comment">// With RETURNING - returns inserted rows</span>
 <span class="hljs-keyword">const</span> createdUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
   db,
-  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span> })
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
-  ),
   { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Bob&quot;</span> },
 );
 </code></pre>
@@ -292,7 +291,7 @@
 <span class="hljs-comment">// params: { cutoff: Date }</span>
 </code></pre>
 <p><strong>Example - Execution</strong></p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineUpdate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeUpdate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -304,25 +303,25 @@
 <span class="hljs-comment">// Without RETURNING - returns number of rows updated</span>
 <span class="hljs-keyword">const</span> updatedRows = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
   db,
-  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoff: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoff: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; params.<span class="hljs-property">cutoff</span>),
-  ),
   { <span class="hljs-attr">cutoff</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2024-01-01&quot;</span>) },
 );
 
 <span class="hljs-comment">// With RETURNING - returns updated rows</span>
 <span class="hljs-keyword">const</span> updatedUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
   db,
-  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoff: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoff: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; params.<span class="hljs-property">cutoff</span>)
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">status</span>: u.<span class="hljs-property">status</span> })),
-  ),
   { <span class="hljs-attr">cutoff</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2024-01-01&quot;</span>) },
 );
 </code></pre>
@@ -374,7 +373,7 @@
 <span class="hljs-comment">// params: { status: &quot;inactive&quot; }</span>
 </code></pre>
 <p><strong>Example - Execution</strong></p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -385,9 +384,8 @@
 
 <span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
   db,
-  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { status: <span class="hljs-built_in">string</span> }</span>) =&gt;</span>
-    q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === params.<span class="hljs-property">status</span>),
-  ),
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { status: <span class="hljs-built_in">string</span> }</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === params.<span class="hljs-property">status</span>),
   { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> },
 );
 </code></pre>
@@ -408,7 +406,7 @@
 <h2 id="2-type-safe-contexts" tabindex="-1"><a class="anchor" href="#2-type-safe-contexts" aria-hidden="true">#</a> 2. Type-Safe Contexts</h2>
 <h3 id="21-createschema" tabindex="-1"><a class="anchor" href="#21-createschema" aria-hidden="true">#</a> 2.1 createSchema</h3>
 <p>Creates a phantom-typed <code>DatabaseSchema</code> that ties table names to row types. The schema is passed to execution functions, which provide a type-safe query builder through the lambda’s first parameter.</p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -418,10 +416,11 @@
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
-<span class="hljs-comment">// Schema is passed to defineSelect, which provides the query builder &#x27;q&#x27; parameter</span>
+<span class="hljs-comment">// Schema is passed to executeSelect, which provides the query builder &#x27;q&#x27; parameter</span>
 <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>))),
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>)),
   {},
 );
 </code></pre>

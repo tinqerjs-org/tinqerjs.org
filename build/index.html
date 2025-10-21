@@ -70,7 +70,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 </code></pre>
 <h2 id="quick-start" tabindex="-1"><a class="anchor" href="#quick-start" aria-hidden="true">#</a> Quick Start</h2>
 <h3 id="postgresql-example" tabindex="-1"><a class="anchor" href="#postgresql-example" aria-hidden="true">#</a> PostgreSQL Example</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 <span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
 
@@ -89,20 +89,20 @@ npm install @webpods/tinqer-sql-better-sqlite3
 
 <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
-  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// results: [{ id: 1, name: &quot;Alice&quot; }, { id: 2, name: &quot;Bob&quot; }]</span>
 </code></pre>
 <p><strong>The same query works with SQLite</strong> - just change the adapter and database connection:</p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
 
 <span class="hljs-comment">// Same schema definition</span>
@@ -121,13 +121,13 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// Identical query logic</span>
 <span class="hljs-keyword">const</span> results = <span class="hljs-title function_">executeSelect</span>(
   db,
-  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
-  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// results: [{ id: 1, name: &quot;Alice&quot; }, { id: 2, name: &quot;Bob&quot; }]</span>
@@ -204,6 +204,59 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// The query builder returns a Queryable whose result type is inferred as</span>
 <span class="hljs-comment">// { id: number; name: string; email: string }</span>
 </code></pre>
+<h3 id="query-composition" tabindex="-1"><a class="anchor" href="#query-composition" aria-hidden="true">#</a> Query Composition</h3>
+<p>Query plans are <strong>immutable and composable</strong> - you can chain operations onto plan handles to create reusable base queries and branch into specialized variations.</p>
+<h4 id="chaining-operations-on-plans" tabindex="-1"><a class="anchor" href="#chaining-operations-on-plans" aria-hidden="true">#</a> Chaining Operations on Plans</h4>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+
+<span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
+
+<span class="hljs-comment">// Start with base query</span>
+<span class="hljs-keyword">const</span> plan = <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>))
+  .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">18</span>)
+  .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">isActive</span>)
+  .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
+  .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> }));
+
+<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">toSql</span>(plan, {});
+</code></pre>
+<h4 id="reusable-base-queries" tabindex="-1"><a class="anchor" href="#reusable-base-queries" aria-hidden="true">#</a> Reusable Base Queries</h4>
+<p>Plans are immutable - each operation returns a new plan without modifying the original. This enables creating base queries and branching:</p>
+<pre class="hljs"><code><span class="hljs-keyword">type</span> <span class="hljs-title class_">DeptParams</span> = { <span class="hljs-attr">dept</span>: <span class="hljs-built_in">number</span> };
+
+<span class="hljs-comment">// Reusable base query</span>
+<span class="hljs-keyword">const</span> usersInDept = <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">p</span>: <span class="hljs-title class_">DeptParams</span></span>) =&gt;</span>
+  q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">departmentId</span> === p.<span class="hljs-property">dept</span>),
+);
+
+<span class="hljs-comment">// Branch 1: Active users only</span>
+<span class="hljs-keyword">const</span> activeUsers = usersInDept
+  .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">isActive</span> === <span class="hljs-literal">true</span>)
+  .<span class="hljs-property">where</span>&lt;{ <span class="hljs-attr">minAge</span>: <span class="hljs-built_in">number</span> }&gt;(<span class="hljs-function">(<span class="hljs-params">u, p</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= p.<span class="hljs-property">minAge</span>);
+
+<span class="hljs-comment">// Branch 2: Inactive users only</span>
+<span class="hljs-keyword">const</span> inactiveUsers = usersInDept
+  .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">isActive</span> === <span class="hljs-literal">false</span>)
+  .<span class="hljs-property">where</span>&lt;{ <span class="hljs-attr">maxAge</span>: <span class="hljs-built_in">number</span> }&gt;(<span class="hljs-function">(<span class="hljs-params">u, p</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt;= p.<span class="hljs-property">maxAge</span>);
+
+<span class="hljs-comment">// Execute branches with different parameters</span>
+<span class="hljs-title function_">toSql</span>(activeUsers, { <span class="hljs-attr">dept</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">minAge</span>: <span class="hljs-number">25</span> });
+<span class="hljs-title function_">toSql</span>(inactiveUsers, { <span class="hljs-attr">dept</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">maxAge</span>: <span class="hljs-number">65</span> });
+</code></pre>
+<h4 id="parameter-accumulation" tabindex="-1"><a class="anchor" href="#parameter-accumulation" aria-hidden="true">#</a> Parameter Accumulation</h4>
+<p>Parameters from the builder function and chained operations are merged:</p>
+<pre class="hljs"><code><span class="hljs-keyword">type</span> <span class="hljs-title class_">BuilderParams</span> = { <span class="hljs-attr">baseAge</span>: <span class="hljs-built_in">number</span> };
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">ChainParams</span> = { <span class="hljs-attr">maxAge</span>: <span class="hljs-built_in">number</span> };
+
+<span class="hljs-keyword">const</span> plan = <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">p</span>: <span class="hljs-title class_">BuilderParams</span></span>) =&gt;</span>
+  q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; p.<span class="hljs-property">baseAge</span>),
+).<span class="hljs-property">where</span>&lt;<span class="hljs-title class_">ChainParams</span>&gt;(<span class="hljs-function">(<span class="hljs-params">u, p</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt; p.<span class="hljs-property">maxAge</span>);
+
+<span class="hljs-comment">// Must provide both parameter types</span>
+<span class="hljs-title function_">toSql</span>(plan, { <span class="hljs-attr">baseAge</span>: <span class="hljs-number">18</span>, <span class="hljs-attr">maxAge</span>: <span class="hljs-number">65</span> });
+</code></pre>
+<p>Composition works with all operations: <code>defineSelect</code>, <code>defineInsert</code>, <code>defineUpdate</code>, <code>defineDelete</code>.</p>
 <h3 id="joins" tabindex="-1"><a class="anchor" href="#joins" aria-hidden="true">#</a> Joins</h3>
 <p>Tinqer mirrors LINQ semantics. Inner joins have a dedicated operator; left outer and cross joins follow the familiar <code>groupJoin</code>/<code>selectMany</code> patterns from C#.</p>
 <h4 id="inner-join" tabindex="-1"><a class="anchor" href="#inner-join" aria-hidden="true">#</a> Inner Join</h4>
@@ -282,21 +335,19 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <pre class="hljs"><code><span class="hljs-comment">// Get top earner per department (automatically wrapped in subquery)</span>
 <span class="hljs-keyword">const</span> topEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  <span class="hljs-title function_">defineSelect</span>(
-    schema,
-    <span class="hljs-function">(<span class="hljs-params">q, params, h</span>) =&gt;</span>
-      q
-        .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
-        .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
-          ...e,
-          <span class="hljs-attr">rank</span>: h
-            .<span class="hljs-title function_">window</span>(e)
-            .<span class="hljs-title function_">partitionBy</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">department</span>)
-            .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">salary</span>)
-            .<span class="hljs-title function_">rowNumber</span>(),
-        }))
-        .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
-  ),
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, params, h</span>) =&gt;</span>
+    q
+      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
+      .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
+        ...e,
+        <span class="hljs-attr">rank</span>: h
+          .<span class="hljs-title function_">window</span>(e)
+          .<span class="hljs-title function_">partitionBy</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">department</span>)
+          .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">salary</span>)
+          .<span class="hljs-title function_">rowNumber</span>(),
+      }))
+      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
   {},
 );
 
@@ -310,7 +361,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <p><strong>Automatic Subquery Wrapping</strong>: Tinqer automatically detects when <code>where()</code> clauses reference window function columns and wraps the query in a subquery, since SQL doesn’t allow filtering on window functions at the same level where they’re defined.</p>
 <p>See the <a href="docs/guide.md#8-window-functions">Window Functions Guide</a> for detailed examples of <code>RANK()</code>, <code>DENSE_RANK()</code>, complex ordering, and <a href="docs/guide.md#85-filtering-on-window-function-results">filtering on window results</a>.</p>
 <h3 id="crud-operations" tabindex="-1"><a class="anchor" href="#crud-operations" aria-hidden="true">#</a> CRUD Operations</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineInsert, defineUpdate, defineDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
@@ -318,25 +369,25 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// INSERT</span>
 <span class="hljs-keyword">const</span> insertedRows = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
   db,
-  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
     q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>,
       <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span>,
     }),
-  ),
   {},
 );
 
 <span class="hljs-comment">// UPDATE with RETURNING</span>
 <span class="hljs-keyword">const</span> inactiveUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
   db,
-  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoffDate: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoffDate: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; params.<span class="hljs-property">cutoffDate</span>)
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>),
-  ),
   { <span class="hljs-attr">cutoffDate</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2023-01-01&quot;</span>) },
 );
 
@@ -345,7 +396,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// DELETE</span>
 <span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
   db,
-  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;deleted&quot;</span>)),
+  schema,
+  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;deleted&quot;</span>),
   {},
 );
 
@@ -477,6 +529,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
   <li class="toc-sub"><a href="#sql-generation-without-execution">SQL Generation Without Execution</a></li>
   <li><a href="#core-features">Core Features</a></li>
   <li class="toc-sub"><a href="#type-safe-query-building">Type-Safe Query Building</a></li>
+  <li class="toc-sub"><a href="#query-composition">Query Composition</a></li>
   <li class="toc-sub"><a href="#joins">Joins</a></li>
   <li class="toc-sub"><a href="#grouping-and-aggregation">Grouping and Aggregation</a></li>
   <li class="toc-sub"><a href="#window-functions">Window Functions</a></li>
