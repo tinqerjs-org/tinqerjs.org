@@ -90,13 +90,19 @@
 </code></pre>
 <h3 id="12-setup-%26-query-execution" tabindex="-1"><a class="anchor" href="#12-setup-%26-query-execution" aria-hidden="true">#</a> 1.2 Setup &amp; Query Execution</h3>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> {
+  createSchema,
+  defineSelect,
+  defineInsert,
+  defineUpdate,
+  defineDelete,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> {
   executeSelect,
   executeInsert,
   executeUpdate,
   executeDelete,
-  selectStatement,
+  toSql,
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -110,70 +116,68 @@
 <span class="hljs-comment">// Execute with params</span>
 <span class="hljs-keyword">const</span> activeUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">active</span> &amp;&amp; u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 
 <span class="hljs-comment">// Execute with params</span>
 <span class="hljs-keyword">const</span> matchingUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">21</span> },
 );
 
 <span class="hljs-comment">// INSERT with RETURNING</span>
 <span class="hljs-keyword">const</span> createdUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">active</span>: <span class="hljs-literal">true</span> })
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">createdAt</span>: u.<span class="hljs-property">createdAt</span> })),
+  ),
   {},
 );
 
 <span class="hljs-comment">// UPDATE</span>
 <span class="hljs-keyword">const</span> updatedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">active</span>: <span class="hljs-literal">false</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">65</span>),
+  ),
   {},
 );
 
 <span class="hljs-comment">// DELETE</span>
 <span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> !u.<span class="hljs-property">active</span>),
+  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> !u.<span class="hljs-property">active</span>)),
   {},
 );
 
 <span class="hljs-comment">// Generate SQL without executing</span>
-<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">selectStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>)),
+<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">email</span>.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;@example.com&quot;</span>))),
   {},
 );
 </code></pre>
 <h3 id="13-postgresql-dialect-notes" tabindex="-1"><a class="anchor" href="#13-postgresql-dialect-notes" aria-hidden="true">#</a> 1.3 PostgreSQL Dialect Notes</h3>
 <ul>
 <li>Booleans map to <code>BOOLEAN</code> values (<code>true</code>/<code>false</code>).</li>
-<li>Case-insensitive comparisons use <code>ILIKE</code> when you call helper functions such as <code>contains</code>.</li>
+<li>Case-insensitive helper functions generate <code>LOWER()</code> comparisons for portable SQL.</li>
 <li>RETURNING clauses are fully supported on INSERT, UPDATE, and DELETE through the execution helpers.</li>
 <li>Parameter placeholders use the <code>$()</code> syntax expected by pg-promise (e.g., <code>$(minAge)</code>).</li>
 <li>Window functions (<code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code>) are fully supported.</li>
@@ -185,13 +189,19 @@
 </code></pre>
 <h3 id="22-setup-%26-query-execution" tabindex="-1"><a class="anchor" href="#22-setup-%26-query-execution" aria-hidden="true">#</a> 2.2 Setup &amp; Query Execution</h3>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> {
+  createSchema,
+  defineSelect,
+  defineInsert,
+  defineUpdate,
+  defineDelete,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> {
   executeSelect,
   executeInsert,
   executeUpdate,
   executeDelete,
-  selectStatement,
+  toSql,
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -213,45 +223,46 @@ db.<span class="hljs-title function_">exec</span>(<span class="hljs-string">`
 
 <span class="hljs-keyword">const</span> inserted = <span class="hljs-title function_">executeInsert</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Sam&quot;</span>, <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;sam@example.com&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">28</span> }),
+  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Sam&quot;</span>, <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;sam@example.com&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">28</span> }),
+  ),
   {},
 );
 <span class="hljs-comment">// inserted === 1</span>
 
 <span class="hljs-keyword">const</span> users = <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { active: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">isActive</span> === params.<span class="hljs-property">active</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
+  ),
   { <span class="hljs-attr">active</span>: <span class="hljs-number">1</span> },
 );
 
 <span class="hljs-keyword">const</span> updated = <span class="hljs-title function_">executeUpdate</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">isActive</span>: <span class="hljs-number">0</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt; <span class="hljs-number">60</span>),
+  ),
   {},
 );
 
 <span class="hljs-keyword">const</span> removed = <span class="hljs-title function_">executeDelete</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt; params.<span class="hljs-property">cutoff</span>),
+  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoff: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+    q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt; params.<span class="hljs-property">cutoff</span>),
+  ),
   { <span class="hljs-attr">cutoff</span>: <span class="hljs-number">18</span> },
 );
 
 <span class="hljs-comment">// Need the SQL text for custom execution?</span>
-<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">selectStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;S&quot;</span>)),
+<span class="hljs-keyword">const</span> { sql, params } = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;S&quot;</span>))),
   {},
 );
 <span class="hljs-keyword">const</span> rows = db.<span class="hljs-title function_">prepare</span>(sql).<span class="hljs-title function_">all</span>(params);
@@ -338,8 +349,8 @@ db.<span class="hljs-title function_">exec</span>(<span class="hljs-string">`
 </table>
 <h3 id="33-case-insensitive-matching" tabindex="-1"><a class="anchor" href="#33-case-insensitive-matching" aria-hidden="true">#</a> 3.3 Case-Insensitive Matching</h3>
 <p>Use query helpers for portable case-insensitive comparisons:</p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span> };
@@ -347,13 +358,13 @@ db.<span class="hljs-title function_">exec</span>(<span class="hljs-string">`
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
-<span class="hljs-keyword">const</span> { sql } = <span class="hljs-title function_">selectStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
+<span class="hljs-keyword">const</span> { sql } = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, params, helpers</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> helpers.<span class="hljs-property">functions</span>.<span class="hljs-title function_">icontains</span>(u.<span class="hljs-property">name</span>, <span class="hljs-string">&quot;alice&quot;</span>)),
+  ),
   {},
 );
-<span class="hljs-comment">// PostgreSQL: WHERE &quot;name&quot; ILIKE $(__p1)</span>
+<span class="hljs-comment">// PostgreSQL: WHERE LOWER(&quot;name&quot;) LIKE &#x27;%&#x27; || LOWER($(__p1)) || &#x27;%&#x27;</span>
 <span class="hljs-comment">// SQLite: WHERE LOWER(&quot;name&quot;) LIKE &#x27;%&#x27; || LOWER(@__p1) || &#x27;%&#x27;</span>
 </code></pre>
 <h3 id="34-returning-behaviour" tabindex="-1"><a class="anchor" href="#34-returning-behaviour" aria-hidden="true">#</a> 3.4 RETURNING Behaviour</h3>

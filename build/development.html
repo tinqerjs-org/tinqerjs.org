@@ -222,8 +222,8 @@ npm <span class="hljs-built_in">test</span>
 <p><strong>Unit Test Example:</strong></p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
 <span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { selectStatement } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;SQL Generation&quot;</span>, <span class="hljs-function">() =&gt;</span> {
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;should generate SQL with WHERE clause&quot;</span>, <span class="hljs-function">() =&gt;</span> {
@@ -232,7 +232,10 @@ npm <span class="hljs-built_in">test</span>
     }
 
     <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
-    <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>));
+    <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">toSql</span>(
+      <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>)),
+      {},
+    );
 
     <span class="hljs-comment">// Assert SQL and parameters</span>
     assert.<span class="hljs-title function_">ok</span>(result.<span class="hljs-property">sql</span>.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&quot;WHERE&quot;</span>));
@@ -243,7 +246,7 @@ npm <span class="hljs-built_in">test</span>
 <p><strong>Integration Test Example:</strong></p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it, beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
 <span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 <span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./shared-db.js&quot;</span>;
 
@@ -258,12 +261,12 @@ npm <span class="hljs-built_in">test</span>
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;should execute SELECT query&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
       db,
-      schema,
-      <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+      <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
         q
           .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
           .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
           .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>),
+      ),
       { <span class="hljs-attr">minAge</span>: <span class="hljs-number">25</span> },
     );
 
@@ -469,13 +472,13 @@ pgp.<span class="hljs-title function_">end</span>(); <span class="hljs-comment">
 <pre class="hljs"><code><span class="hljs-comment">// Incorrect - template literal in lambda</span>
 .<span class="hljs-title function_">where</span>(<span class="hljs-function"><span class="hljs-params">u</span> =&gt;</span> u.<span class="hljs-property">name</span> === <span class="hljs-string">`User <span class="hljs-subst">${userId}</span>`</span>)
 
-<span class="hljs-comment">// Correct - use params with executeSelect</span>
+<span class="hljs-comment">// Correct - use params with defineSelect and executeSelect</span>
 <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span> }</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span> === params.<span class="hljs-property">name</span>),
-  { <span class="hljs-attr">name</span>: <span class="hljs-string">`User <span class="hljs-subst">${userId}</span>`</span> }
+  ),
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">`User <span class="hljs-subst">${userId}</span>`</span> },
 );
 </code></pre>
 <p><strong>Issue: Unknown Identifier</strong></p>
@@ -486,13 +489,13 @@ pgp.<span class="hljs-title function_">end</span>(); <span class="hljs-comment">
 <span class="hljs-keyword">const</span> minAge = <span class="hljs-number">18</span>;
 .<span class="hljs-title function_">where</span>(<span class="hljs-function"><span class="hljs-params">u</span> =&gt;</span> u.<span class="hljs-property">age</span> &gt;= minAge)
 
-<span class="hljs-comment">// Correct - params pattern with executeSelect</span>
+<span class="hljs-comment">// Correct - params pattern with defineSelect and executeSelect</span>
 <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>),
-  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> }
+  ),
+  { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 </code></pre>
 <h3 id="63-type-errors" tabindex="-1"><a class="anchor" href="#63-type-errors" aria-hidden="true">#</a> 6.3 Type Errors</h3>
@@ -503,8 +506,8 @@ pgp.<span class="hljs-title function_">end</span>(); <span class="hljs-comment">
 <span class="hljs-comment">// Types will be &#x27;unknown&#x27; without schema</span>
 <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>), <span class="hljs-comment">// Type is Queryable&lt;unknown&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)), <span class="hljs-comment">// Type is Queryable&lt;unknown&gt;</span>
+  {},
 );
 </code></pre>
 <p><strong>Solution:</strong> Provide explicit schema type to createSchema:</p>
@@ -517,8 +520,8 @@ pgp.<span class="hljs-title function_">end</span>(); <span class="hljs-comment">
 <span class="hljs-comment">// Now fully typed from schema</span>
 <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>), <span class="hljs-comment">// Fully typed: Queryable&lt;{ id: number; name: string }&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)), <span class="hljs-comment">// Fully typed: Queryable&lt;{ id: number; name: string }&gt;</span>
+  {},
 );
 </code></pre>
 <p><strong>Issue: Property Does Not Exist</strong></p>

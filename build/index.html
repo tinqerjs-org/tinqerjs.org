@@ -70,7 +70,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 </code></pre>
 <h2 id="quick-start" tabindex="-1"><a class="anchor" href="#quick-start" aria-hidden="true">#</a> Quick Start</h2>
 <h3 id="postgresql-example" tabindex="-1"><a class="anchor" href="#postgresql-example" aria-hidden="true">#</a> PostgreSQL Example</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 <span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
 
@@ -89,20 +89,20 @@ npm install @webpods/tinqer-sql-better-sqlite3
 
 <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// results: [{ id: 1, name: &quot;Alice&quot; }, { id: 2, name: &quot;Bob&quot; }]</span>
 </code></pre>
 <p><strong>The same query works with SQLite</strong> - just change the adapter and database connection:</p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
 
 <span class="hljs-comment">// Same schema definition</span>
@@ -121,26 +121,27 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// Identical query logic</span>
 <span class="hljs-keyword">const</span> results = <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>)
       .<span class="hljs-title function_">orderBy</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">name</span>)
       .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: u.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: u.<span class="hljs-property">name</span> })),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// results: [{ id: 1, name: &quot;Alice&quot; }, { id: 2, name: &quot;Bob&quot; }]</span>
 </code></pre>
 <h3 id="sql-generation-without-execution" tabindex="-1"><a class="anchor" href="#sql-generation-without-execution" aria-hidden="true">#</a> SQL Generation Without Execution</h3>
-<p><strong><code>execute*</code> functions</strong> execute queries and return results. <strong><code>*Statement</code> functions</strong> generate SQL and parameters without executing - useful for debugging, logging, or custom execution:</p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> {
-  selectStatement,
-  insertStatement,
-  updateStatement,
-  deleteStatement,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<p><strong><code>execute*</code> functions</strong> execute queries and return results. <strong><code>toSql</code> function</strong> generates SQL and parameters without executing - useful for debugging, logging, or custom execution:</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> {
+  createSchema,
+  defineSelect,
+  defineInsert,
+  defineUpdate,
+  defineDelete,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
@@ -149,38 +150,41 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
 <span class="hljs-comment">// SELECT - returns { sql, params }</span>
-<span class="hljs-keyword">const</span> select = <span class="hljs-title function_">selectStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>),
+<span class="hljs-keyword">const</span> select = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// select.sql: SELECT * FROM &quot;users&quot; WHERE &quot;age&quot; &gt;= $(minAge)</span>
 <span class="hljs-comment">// select.params: { minAge: 18 }</span>
 
 <span class="hljs-comment">// INSERT</span>
-<span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">insertStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span>, <span class="hljs-attr">age</span>: params.<span class="hljs-property">age</span> }),
+<span class="hljs-keyword">const</span> insert = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { name: <span class="hljs-built_in">string</span>; age: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+    q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({ <span class="hljs-attr">name</span>: params.<span class="hljs-property">name</span>, <span class="hljs-attr">age</span>: params.<span class="hljs-property">age</span> }),
+  ),
   { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span> },
 );
 <span class="hljs-comment">// insert.sql: INSERT INTO &quot;users&quot; (&quot;name&quot;, &quot;age&quot;) VALUES ($(name), $(age))</span>
 
 <span class="hljs-comment">// UPDATE</span>
-<span class="hljs-keyword">const</span> update = <span class="hljs-title function_">updateStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+<span class="hljs-keyword">const</span> update = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { newAge: <span class="hljs-built_in">number</span>; userId: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">age</span>: params.<span class="hljs-property">newAge</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span> === params.<span class="hljs-property">userId</span>),
+  ),
   { <span class="hljs-attr">newAge</span>: <span class="hljs-number">31</span>, <span class="hljs-attr">userId</span>: <span class="hljs-number">1</span> },
 );
 <span class="hljs-comment">// update.sql: UPDATE &quot;users&quot; SET &quot;age&quot; = $(newAge) WHERE &quot;id&quot; = $(userId)</span>
 
 <span class="hljs-comment">// DELETE</span>
-<span class="hljs-keyword">const</span> del = <span class="hljs-title function_">deleteStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt; params.<span class="hljs-property">minAge</span>),
+<span class="hljs-keyword">const</span> del = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+    q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &lt; params.<span class="hljs-property">minAge</span>),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// del.sql: DELETE FROM &quot;users&quot; WHERE &quot;age&quot; &lt; $(minAge)</span>
@@ -278,19 +282,21 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <pre class="hljs"><code><span class="hljs-comment">// Get top earner per department (automatically wrapped in subquery)</span>
 <span class="hljs-keyword">const</span> topEarners = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeSelect</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params, h</span>) =&gt;</span>
-    q
-      .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
-      .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
-        ...e,
-        <span class="hljs-attr">rank</span>: h
-          .<span class="hljs-title function_">window</span>(e)
-          .<span class="hljs-title function_">partitionBy</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">department</span>)
-          .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">salary</span>)
-          .<span class="hljs-title function_">rowNumber</span>(),
-      }))
-      .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
+  <span class="hljs-title function_">defineSelect</span>(
+    schema,
+    <span class="hljs-function">(<span class="hljs-params">q, params, h</span>) =&gt;</span>
+      q
+        .<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;employees&quot;</span>)
+        .<span class="hljs-title function_">select</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> ({
+          ...e,
+          <span class="hljs-attr">rank</span>: h
+            .<span class="hljs-title function_">window</span>(e)
+            .<span class="hljs-title function_">partitionBy</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">department</span>)
+            .<span class="hljs-title function_">orderByDescending</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-property">salary</span>)
+            .<span class="hljs-title function_">rowNumber</span>(),
+        }))
+        .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> e.<span class="hljs-property">rank</span> === <span class="hljs-number">1</span>), <span class="hljs-comment">// Filtering on window function result</span>
+  ),
   {},
 );
 
@@ -304,7 +310,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <p><strong>Automatic Subquery Wrapping</strong>: Tinqer automatically detects when <code>where()</code> clauses reference window function columns and wraps the query in a subquery, since SQL doesn’t allow filtering on window functions at the same level where they’re defined.</p>
 <p>See the <a href="docs/guide.md#8-window-functions">Window Functions Guide</a> for detailed examples of <code>RANK()</code>, <code>DENSE_RANK()</code>, complex ordering, and <a href="docs/guide.md#85-filtering-on-window-function-results">filtering on window results</a>.</p>
 <h3 id="crud-operations" tabindex="-1"><a class="anchor" href="#crud-operations" aria-hidden="true">#</a> CRUD Operations</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineInsert, defineUpdate, defineDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
@@ -312,25 +318,25 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// INSERT</span>
 <span class="hljs-keyword">const</span> insertedRows = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeInsert</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
+  <span class="hljs-title function_">defineInsert</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span>
     q.<span class="hljs-title function_">insertInto</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">values</span>({
       <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span>,
       <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;alice@example.com&quot;</span>,
     }),
+  ),
   {},
 );
 
 <span class="hljs-comment">// UPDATE with RETURNING</span>
 <span class="hljs-keyword">const</span> inactiveUsers = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeUpdate</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span>
+  <span class="hljs-title function_">defineUpdate</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { cutoffDate: <span class="hljs-built_in">Date</span> }</span>) =&gt;</span>
     q
       .<span class="hljs-title function_">update</span>(<span class="hljs-string">&quot;users&quot;</span>)
       .<span class="hljs-title function_">set</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;inactive&quot;</span> })
       .<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">lastLogin</span> &lt; params.<span class="hljs-property">cutoffDate</span>)
       .<span class="hljs-title function_">returning</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">id</span>),
+  ),
   { <span class="hljs-attr">cutoffDate</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&quot;2023-01-01&quot;</span>) },
 );
 
@@ -339,8 +345,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// DELETE</span>
 <span class="hljs-keyword">const</span> deletedCount = <span class="hljs-keyword">await</span> <span class="hljs-title function_">executeDelete</span>(
   db,
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;deleted&quot;</span>),
+  <span class="hljs-title function_">defineDelete</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">deleteFrom</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;deleted&quot;</span>)),
   {},
 );
 
@@ -351,16 +356,20 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <pre class="hljs"><code><span class="hljs-comment">// External parameters via params object</span>
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
-<span class="hljs-keyword">const</span> sample = <span class="hljs-title function_">selectStatement</span>(
-  schema,
-  <span class="hljs-function">(<span class="hljs-params">q, params</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>),
+<span class="hljs-keyword">const</span> sample = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q, <span class="hljs-attr">params</span>: { minAge: <span class="hljs-built_in">number</span> }</span>) =&gt;</span>
+    q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= params.<span class="hljs-property">minAge</span>),
+  ),
   { <span class="hljs-attr">minAge</span>: <span class="hljs-number">18</span> },
 );
 <span class="hljs-comment">// SQL (PostgreSQL): SELECT * FROM &quot;users&quot; WHERE &quot;age&quot; &gt;= $(minAge)</span>
 <span class="hljs-comment">// params: { minAge: 18 }</span>
 
 <span class="hljs-comment">// Literals auto-parameterized automatically</span>
-<span class="hljs-keyword">const</span> literals = <span class="hljs-title function_">selectStatement</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>), {});
+<span class="hljs-keyword">const</span> literals = <span class="hljs-title function_">toSql</span>(
+  <span class="hljs-title function_">defineSelect</span>(schema, <span class="hljs-function">(<span class="hljs-params">q</span>) =&gt;</span> q.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;users&quot;</span>).<span class="hljs-title function_">where</span>(<span class="hljs-function">(<span class="hljs-params">u</span>) =&gt;</span> u.<span class="hljs-property">age</span> &gt;= <span class="hljs-number">18</span>)),
+  {},
+);
 <span class="hljs-comment">// params: { __p1: 18 }</span>
 </code></pre>
 <h3 id="case-insensitive-string-operations" tabindex="-1"><a class="anchor" href="#case-insensitive-string-operations" aria-hidden="true">#</a> Case-Insensitive String Operations</h3>
@@ -415,7 +424,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <h2 id="differences-from-net-linq-to-sql" tabindex="-1"><a class="anchor" href="#differences-from-net-linq-to-sql" aria-hidden="true">#</a> Differences from .NET LINQ to SQL</h2>
 <ul>
 <li>Lambdas cannot capture external variables; use params object</li>
-<li>Limited method set (no <code>SelectMany</code>, <code>GroupJoin</code>, <code>DefaultIfEmpty</code>)</li>
+<li>Join operations (<code>join</code>, <code>groupJoin</code>, <code>selectMany</code>) must be composed inside the defineSelect builder; they cannot be chained on plan handles</li>
 <li>Left outer joins and cross joins supported via LINQ patterns (right/full joins still require manual SQL)</li>
 <li>No deferred execution; SQL generated on demand</li>
 <li>Grouping supports <code>count</code>, <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code></li>
