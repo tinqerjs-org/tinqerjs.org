@@ -113,7 +113,7 @@
 </ul>
 <h3 id="12-installation" tabindex="-1"><a class="anchor" href="#12-installation" aria-hidden="true">#</a> 1.2 Installation</h3>
 <pre class="hljs"><code><span class="hljs-comment"># Clone the repository</span>
-git <span class="hljs-built_in">clone</span> https://github.com/webpods-org/tinqer.git
+git <span class="hljs-built_in">clone</span> https://github.com/tinqerjs-org/tinqer.git
 <span class="hljs-built_in">cd</span> tinqer
 
 <span class="hljs-comment"># Install dependencies</span>
@@ -134,14 +134,14 @@ npm install
 │   │   │   └── types/                   # TypeScript type definitions
 │   │   └── tests/                       # Core library tests
 │   │
-│   ├── tinqer-sql-pg-promise/           # PostgreSQL adapter
+│   ├── pg-promise-adapter/           # PostgreSQL adapter
 │   │   ├── src/
 │   │   │   ├── adapter.ts               # PostgreSQL SQL adapter
 │   │   │   ├── execute.ts               # Execution functions
 │   │   │   └── visitors/                # PostgreSQL-specific visitors
 │   │   └── tests/                       # Integration tests
 │   │
-│   ├── tinqer-sql-better-sqlite3/       # SQLite adapter
+│   ├── better-sqlite3-adapter/       # SQLite adapter
 │   │   ├── src/
 │   │   │   ├── adapter.ts               # SQLite SQL adapter
 │   │   │   ├── execute.ts               # Execution functions
@@ -213,8 +213,8 @@ npm <span class="hljs-built_in">test</span>
 </ul>
 <p><strong>Integration Tests</strong> (<code>packages/tinqer-sql-*/tests/</code>):</p>
 <ul>
-<li>PostgreSQL integration: <code>tinqer-sql-pg-promise-integration/tests/</code></li>
-<li>SQLite integration: <code>tinqer-sql-better-sqlite3-integration/tests/</code></li>
+<li>PostgreSQL integration: <code>pg-promise-adapter-integration/tests/</code></li>
+<li>SQLite integration: <code>better-sqlite3-adapter-integration/tests/</code></li>
 <li>Full end-to-end query execution tests</li>
 <li>Database-specific feature tests</li>
 </ul>
@@ -222,8 +222,8 @@ npm <span class="hljs-built_in">test</span>
 <p><strong>Unit Test Example:</strong></p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
 <span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;SQL Generation&quot;</span>, <span class="hljs-function">() =&gt;</span> {
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;should generate SQL with WHERE clause&quot;</span>, <span class="hljs-function">() =&gt;</span> {
@@ -246,8 +246,8 @@ npm <span class="hljs-built_in">test</span>
 <p><strong>Integration Test Example:</strong></p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> { describe, it, beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;mocha&quot;</span>;
 <span class="hljs-keyword">import</span> { strict <span class="hljs-keyword">as</span> assert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;assert&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 <span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./shared-db.js&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
@@ -275,7 +275,7 @@ npm <span class="hljs-built_in">test</span>
 });
 </code></pre>
 <p><strong>Test Database Setup:</strong></p>
-<p>PostgreSQL tests use shared connection (<code>packages/tinqer-sql-pg-promise-integration/tests/shared-db.ts</code>):</p>
+<p>PostgreSQL tests use shared connection (<code>packages/pg-promise-adapter-integration/tests/shared-db.ts</code>):</p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
 
 <span class="hljs-keyword">const</span> pgp = <span class="hljs-title function_">pgPromise</span>();

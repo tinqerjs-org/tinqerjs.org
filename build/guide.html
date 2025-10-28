@@ -158,8 +158,8 @@
 <h2 id="1-filtering-operations" tabindex="-1"><a class="anchor" href="#1-filtering-operations" aria-hidden="true">#</a> 1. Filtering Operations</h2>
 <p>The <code>where</code> method applies predicates to filter query results. Multiple <code>where</code> calls are combined with AND logic.</p>
 <h3 id="11-basic-comparison" tabindex="-1"><a class="anchor" href="#11-basic-comparison" aria-hidden="true">#</a> 1.1 Basic Comparison</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">active</span>: <span class="hljs-built_in">boolean</span> };
@@ -1360,8 +1360,8 @@
 <h3 id="141-insert-statements" tabindex="-1"><a class="anchor" href="#141-insert-statements" aria-hidden="true">#</a> 14.1 INSERT Statements</h3>
 <p>The <code>insertInto</code> function creates INSERT operations. Values are specified using direct object syntax (no lambda wrapping required).</p>
 <h4 id="basic-insert" tabindex="-1"><a class="anchor" href="#basic-insert" aria-hidden="true">#</a> Basic INSERT</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineInsert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineInsert } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span> };
@@ -1451,8 +1451,8 @@
 <h3 id="142-update-statements" tabindex="-1"><a class="anchor" href="#142-update-statements" aria-hidden="true">#</a> 14.2 UPDATE Statements</h3>
 <p>The <code>update</code> function creates UPDATE operations. The <code>.set()</code> method uses direct object syntax (no lambda wrapping required).</p>
 <h4 id="basic-update" tabindex="-1"><a class="anchor" href="#basic-update" aria-hidden="true">#</a> Basic UPDATE</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineUpdate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineUpdate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -1532,8 +1532,8 @@ Full table updates are dangerous and must be explicitly allowed.
 <h3 id="143-delete-statements" tabindex="-1"><a class="anchor" href="#143-delete-statements" aria-hidden="true">#</a> 14.3 DELETE Statements</h3>
 <p>The <code>deleteFrom</code> function creates DELETE operations with optional WHERE conditions.</p>
 <h4 id="basic-delete" tabindex="-1"><a class="anchor" href="#basic-delete" aria-hidden="true">#</a> Basic DELETE</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -1650,8 +1650,8 @@ Full table updates are dangerous and must be explicitly allowed.
 <h3 id="145-executing-crud-operations" tabindex="-1"><a class="anchor" href="#145-executing-crud-operations" aria-hidden="true">#</a> 14.5 Executing CRUD Operations</h3>
 <p>The adapter packages provide execution functions for all CRUD operations:</p>
 <h4 id="postgresql-(pg-promise)" tabindex="-1"><a class="anchor" href="#postgresql-(pg-promise)" aria-hidden="true">#</a> PostgreSQL (pg-promise)</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -1690,8 +1690,8 @@ Full table updates are dangerous and must be explicitly allowed.
 );
 </code></pre>
 <h4 id="sqlite-(better-sqlite3)" tabindex="-1"><a class="anchor" href="#sqlite-(better-sqlite3)" aria-hidden="true">#</a> SQLite (better-sqlite3)</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/better-sqlite3-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -1779,8 +1779,8 @@ Full table updates are dangerous and must be explicitly allowed.
 <p>Tinqer query plans are <strong>immutable and composable</strong>. Plan handles returned by <code>define*</code> functions support method chaining - each operation returns a new plan without modifying the original. This enables powerful query composition patterns: reusable base queries, branching specialized variations, and parameter accumulation.</p>
 <h3 id="151-chaining-operations-on-plans" tabindex="-1"><a class="anchor" href="#151-chaining-operations-on-plans" aria-hidden="true">#</a> 15.1 Chaining Operations on Plans</h3>
 <p>All plan handles support chaining operations like <code>where()</code>, <code>orderBy()</code>, <code>select()</code>, etc.:</p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">isActive</span>: <span class="hljs-built_in">boolean</span> };
