@@ -60,8 +60,8 @@
 <h2 id="database-adapters" tabindex="-1"><a class="anchor" href="#database-adapters" aria-hidden="true">#</a> Database Adapters</h2>
 <p>The core package is adapter-agnostic; database-specific behavior lives in companion adapters. The repository currently ships two adapters:</p>
 <ul>
-<li><code>@webpods/tinqer-sql-pg-promise</code> – PostgreSQL integration built on pg-promise</li>
-<li><code>@webpods/tinqer-sql-better-sqlite3</code> – SQLite integration powered by better-sqlite3</li>
+<li><code>@tinqerjs/pg-promise-adapter</code> – PostgreSQL integration built on pg-promise</li>
+<li><code>@tinqerjs/better-sqlite3-adapter</code> – SQLite integration powered by better-sqlite3</li>
 </ul>
 <p>Both adapters provide execution functions (<code>executeSelect</code>, <code>executeInsert</code>, etc.) that accept plan handles created by <code>define*</code> functions from the core package. Query plans are created using <code>defineSelect</code>, <code>defineInsert</code>, <code>defineUpdate</code>, and <code>defineDelete</code>, which parse query builder lambdas. Plans can then be executed with adapter-specific <code>execute*</code> functions or converted to SQL using <code>toSql</code>, allowing database switching without rewriting query code.</p>
 <h2 id="core-design-principles" tabindex="-1"><a class="anchor" href="#core-design-principles" aria-hidden="true">#</a> Core Design Principles</h2>

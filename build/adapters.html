@@ -57,7 +57,7 @@
       <article class="markdown-body">
         <p><a href="../README.md">← Back to README</a></p>
 <h1 id="database-adapters" tabindex="-1"><a class="anchor" href="#database-adapters" aria-hidden="true">#</a> Database Adapters</h1>
-<p>Tinqer ships dedicated adapters for PostgreSQL (<code>@webpods/tinqer-sql-pg-promise</code>) and SQLite (<code>@webpods/tinqer-sql-better-sqlite3</code>). Both share the same builder APIs while handling dialect-specific SQL generation and parameter formatting.</p>
+<p>Tinqer ships dedicated adapters for PostgreSQL (<code>@tinqerjs/pg-promise-adapter</code>) and SQLite (<code>@tinqerjs/better-sqlite3-adapter</code>). Both share the same builder APIs while handling dialect-specific SQL generation and parameter formatting.</p>
 <h2 id="table-of-contents" tabindex="-1"><a class="anchor" href="#table-of-contents" aria-hidden="true">#</a> Table of Contents</h2>
 <ul>
 <li><a href="#1-postgresql-adapter">1. PostgreSQL Adapter</a>
@@ -86,18 +86,18 @@
 <hr>
 <h2 id="1-postgresql-adapter" tabindex="-1"><a class="anchor" href="#1-postgresql-adapter" aria-hidden="true">#</a> 1. PostgreSQL Adapter</h2>
 <h3 id="11-installation" tabindex="-1"><a class="anchor" href="#11-installation" aria-hidden="true">#</a> 1.1 Installation</h3>
-<pre class="hljs"><code>npm install @webpods/tinqer-sql-pg-promise pg-promise
+<pre class="hljs"><code>npm install @tinqerjs/pg-promise-adapter pg-promise
 </code></pre>
 <h3 id="12-setup-%26-query-execution" tabindex="-1"><a class="anchor" href="#12-setup-%26-query-execution" aria-hidden="true">#</a> 1.2 Setup &amp; Query Execution</h3>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> {
   executeSelect,
   executeInsert,
   executeUpdate,
   executeDelete,
   toSql,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">active</span>: <span class="hljs-built_in">boolean</span> };
@@ -180,18 +180,18 @@
 <hr>
 <h2 id="2-sqlite-adapter" tabindex="-1"><a class="anchor" href="#2-sqlite-adapter" aria-hidden="true">#</a> 2. SQLite Adapter</h2>
 <h3 id="21-installation" tabindex="-1"><a class="anchor" href="#21-installation" aria-hidden="true">#</a> 2.1 Installation</h3>
-<pre class="hljs"><code>npm install @webpods/tinqer-sql-better-sqlite3 better-sqlite3
+<pre class="hljs"><code>npm install @tinqerjs/better-sqlite3-adapter better-sqlite3
 </code></pre>
 <h3 id="22-setup-%26-query-execution" tabindex="-1"><a class="anchor" href="#22-setup-%26-query-execution" aria-hidden="true">#</a> 2.2 Setup &amp; Query Execution</h3>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
 <span class="hljs-keyword">import</span> {
   executeSelect,
   executeInsert,
   executeUpdate,
   executeDelete,
   toSql,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/better-sqlite3-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">isActive</span>: <span class="hljs-built_in">number</span> };
@@ -336,8 +336,8 @@ db.<span class="hljs-title function_">exec</span>(<span class="hljs-string">`
 </table>
 <h3 id="33-case-insensitive-matching" tabindex="-1"><a class="anchor" href="#33-case-insensitive-matching" aria-hidden="true">#</a> 3.3 Case-Insensitive Matching</h3>
 <p>Use query helpers for portable case-insensitive comparisons:</p>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema, defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">email</span>: <span class="hljs-built_in">string</span> };

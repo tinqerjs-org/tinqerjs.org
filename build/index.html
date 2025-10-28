@@ -60,18 +60,18 @@
 <h2 id="installation" tabindex="-1"><a class="anchor" href="#installation" aria-hidden="true">#</a> Installation</h2>
 <p>Install the core library and adapter for your database:</p>
 <pre class="hljs"><code><span class="hljs-comment"># Core library</span>
-npm install @webpods/tinqer
+npm install @tinqerjs/tinqer
 
 <span class="hljs-comment"># PostgreSQL adapter (pg-promise)</span>
-npm install @webpods/tinqer-sql-pg-promise
+npm install @tinqerjs/pg-promise-adapter
 
 <span class="hljs-comment"># SQLite adapter (better-sqlite3)</span>
-npm install @webpods/tinqer-sql-better-sqlite3
+npm install @tinqerjs/better-sqlite3-adapter
 </code></pre>
 <h2 id="quick-start" tabindex="-1"><a class="anchor" href="#quick-start" aria-hidden="true">#</a> Quick Start</h2>
 <h3 id="postgresql-example" tabindex="-1"><a class="anchor" href="#postgresql-example" aria-hidden="true">#</a> PostgreSQL Example</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 <span class="hljs-keyword">import</span> pgPromise <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;pg-promise&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -102,8 +102,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
 </code></pre>
 <p><strong>The same query works with SQLite</strong> - just change the adapter and database connection:</p>
 <pre class="hljs"><code><span class="hljs-keyword">import</span> <span class="hljs-title class_">Database</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;better-sqlite3&quot;</span>;
-<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-better-sqlite3&quot;</span>;
+<span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/better-sqlite3-adapter&quot;</span>;
 
 <span class="hljs-comment">// Same schema definition</span>
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
@@ -140,8 +140,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
   defineInsert,
   defineUpdate,
   defineDelete,
-} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Schema</span> {
   <span class="hljs-attr">users</span>: { <span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">age</span>: <span class="hljs-built_in">number</span> };
@@ -207,8 +207,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <h3 id="query-composition" tabindex="-1"><a class="anchor" href="#query-composition" aria-hidden="true">#</a> Query Composition</h3>
 <p>Query plans are <strong>immutable and composable</strong> - you can chain operations onto plan handles to create reusable base queries and branch into specialized variations.</p>
 <h4 id="chaining-operations-on-plans" tabindex="-1"><a class="anchor" href="#chaining-operations-on-plans" aria-hidden="true">#</a> Chaining Operations on Plans</h4>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { defineSelect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { toSql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -361,8 +361,8 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <p><strong>Automatic Subquery Wrapping</strong>: Tinqer automatically detects when <code>where()</code> clauses reference window function columns and wraps the query in a subquery, since SQL doesn’t allow filtering on window functions at the same level where they’re defined.</p>
 <p>See the <a href="docs/guide.md#8-window-functions">Window Functions Guide</a> for detailed examples of <code>RANK()</code>, <code>DENSE_RANK()</code>, complex ordering, and <a href="docs/guide.md#85-filtering-on-window-function-results">filtering on window results</a>.</p>
 <h3 id="crud-operations" tabindex="-1"><a class="anchor" href="#crud-operations" aria-hidden="true">#</a> CRUD Operations</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
-<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer-sql-pg-promise&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
+<span class="hljs-keyword">import</span> { executeInsert, executeUpdate, executeDelete } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/pg-promise-adapter&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -425,7 +425,7 @@ npm install @webpods/tinqer-sql-better-sqlite3
 <span class="hljs-comment">// params: { __p1: 18 }</span>
 </code></pre>
 <h3 id="case-insensitive-string-operations" tabindex="-1"><a class="anchor" href="#case-insensitive-string-operations" aria-hidden="true">#</a> Case-Insensitive String Operations</h3>
-<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@webpods/tinqer&quot;</span>;
+<pre class="hljs"><code><span class="hljs-keyword">import</span> { createSchema } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tinqerjs/tinqer&quot;</span>;
 
 <span class="hljs-keyword">const</span> schema = createSchema&lt;<span class="hljs-title class_">Schema</span>&gt;();
 
@@ -498,15 +498,15 @@ npm install @webpods/tinqer-sql-better-sqlite3
 </thead>
 <tbody>
 <tr>
-<td><code>@webpods/tinqer</code></td>
+<td><code>@tinqerjs/tinqer</code></td>
 <td>Core expression tree and types (re-exported by adapters)</td>
 </tr>
 <tr>
-<td><code>@webpods/tinqer-sql-pg-promise</code></td>
+<td><code>@tinqerjs/pg-promise-adapter</code></td>
 <td>PostgreSQL adapter with pg-promise</td>
 </tr>
 <tr>
-<td><code>@webpods/tinqer-sql-better-sqlite3</code></td>
+<td><code>@tinqerjs/better-sqlite3-adapter</code></td>
 <td>SQLite adapter with better-sqlite3</td>
 </tr>
 </tbody>
